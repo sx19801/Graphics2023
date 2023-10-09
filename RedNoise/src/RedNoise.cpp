@@ -5,6 +5,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <CanvasPoint.h>
+#include <Colour.h>
 
 #define WIDTH 320
 #define HEIGHT 240
@@ -43,6 +45,24 @@ std::vector<glm::vec3> interpolateThreeElementValues(glm::vec3 from, glm::vec3 t
 	return vecOfVecs;
 }
 
+void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour colour) {
+	float toX = to.x;
+	float fromX = from.x;
+	float toY = to.y;
+	float fromY = from.y;
+	float xDiff = toX - fromX;
+	float yDiff = toY - fromY;
+	float numberOfSteps = std::max(std::abs(xDiff), std::abs(yDiff));
+	float xStepSize = xDiff / numberOfSteps;
+	float yStepSize = yDiff / numberOfSteps;
+	uint32_t BLACK = (0 << 24) + (int(0) << 16) + (int(0) << 8) + int(0);
+	for (float i = 0.0; i <= numberOfSteps; i++) {
+		float x = fromX + (xStepSize * i);
+		float y = fromY + (yStepSize * i);
+		window.setPixelColour(round(x), round(y), BLACK);
+	}
+}
+
 void draw(DrawingWindow& window) {
 	window.clearPixels();
 	size_t i = 0;
@@ -50,40 +70,13 @@ void draw(DrawingWindow& window) {
 	glm::vec3 topRight(0, 0, 255);       // blue 
 	glm::vec3 bottomRight(0, 255, 0);    // green 
 	glm::vec3 bottomLeft(255, 255, 0);   // yellow
-	//std::vector<float> gradient = interpolateSingleFloats(255, 0, window.width);
+	//std::vector<float> gradient = interpolateSingleFloats(255, 0, window.width);									for black and white gradient
 	std::vector<glm::vec3> leftColumn = interpolateThreeElementValues(topLeft, bottomLeft, window.height);
 	std::vector<glm::vec3> rightColumn = interpolateThreeElementValues(topRight, bottomRight, window.height);
-	std::cout << glm::to_string(leftColumn[0 + i % window.height]);
 
 	for (size_t y = 0; y < window.height; y++) {
-		float x = 0;
-		glm::vec3 currentRGB = leftColumn[0 + i % window.height];
-		float red = currentRGB[0];
-		float green = currentRGB[1];
-		float blue = currentRGB[2];
-		uint32_t colour = (255 << 24) + (int(red) << 16) + (int(green) << 8) + int(blue);
-		window.setPixelColour(x, y, colour);
-		i++;
-	}
-
-	for (size_t y = 0; y < window.height; y++) {
-		float x = window.width - 1;
-		glm::vec3 currentRGB = rightColumn[0 + i % window.height];
-		float red = currentRGB[0];
-		float green = currentRGB[1];
-		float blue = currentRGB[2];
-		uint32_t colour = (255 << 24) + (int(red) << 16) + (int(green) << 8) + int(blue);
-		window.setPixelColour(x, y, colour);
-		i++;
-	}
-
-	/*testing please work */
-
-
-	for (size_t y = 0; y < window.height; y++) {
-		for (size_t x = 1; x < window.width - 1; x++) {
-
-			std::vector<glm::vec3> rowRGB = interpolateThreeElementValues(leftColumn[y], rightColumn[y], window.width - 1);
+		for (size_t x = 0; x < window.width; x++) {
+			std::vector<glm::vec3> rowRGB = interpolateThreeElementValues(leftColumn[y], rightColumn[y], window.width);
 			glm::vec3 currentRGB = rowRGB[x];
 			float red = currentRGB[0];
 			float green = currentRGB[1];
