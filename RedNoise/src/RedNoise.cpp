@@ -73,6 +73,8 @@ void drawStrokedTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour 
 	drawLine(window, triangle.v2(), triangle.v0(), colour);
 }
 
+//test for git
+
 void draw(DrawingWindow& window) {
 	window.clearPixels();
 	size_t i = 0;
