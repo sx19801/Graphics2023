@@ -20,6 +20,8 @@ void draw(DrawingWindow &window) {
 	}
 }
 
+//this is a test please work o god
+
 void handleEvent(SDL_Event event, DrawingWindow &window) {
 	if (event.type == SDL_KEYDOWN) {
 		if (event.key.keysym.sym == SDLK_LEFT) std::cout << "LEFT" << std::endl;
