@@ -92,31 +92,6 @@ void draw(DrawingWindow& window) {
 			window.setPixelColour(x, y, colour);
 		}
 	}
-
-	/*for (size_t x = 0; x < window.width; x++) {
-		for (size_t y = 0; y < window.height; y++) {
-			glm::vec3 currentRGB = leftColumn[0+i%window.height];
-			float red = currentRGB[0];
-			float green = currentRGB[1];
-			float blue = currentRGB[2];
-			uint32_t colour = (255 << 24) + (int(red) << 16) + (int(green) << 8) + int(blue);
-			window.setPixelColour(x, y, colour);
-			i++;
-		}
-
-	}*/
-
-
-	/*for (size_t y = 0; y < window.height; y++) {
-		for (size_t x = 0; x < window.width; x++) {
-			float red = gradient[0+i%window.width];
-			float green = gradient[0+i%window.width];
-			float blue = gradient[0+i%window.width];
-			uint32_t colour = (255 << 24) + (int(red) << 16) + (int(green) << 8) + int(blue);
-			window.setPixelColour(x, y, colour);
-			i++;
-		}
-	}*/
 }
 
 void handleEvent(SDL_Event event, DrawingWindow& window) {
