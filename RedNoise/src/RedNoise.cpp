@@ -10,10 +10,11 @@
 #include <CanvasTriangle.h>
 #include <algorithm>
 
-#define WIDTH 320
-#define HEIGHT 240
+#define WIDTH 960
+#define HEIGHT 720
 
-
+//#define WIDTH 320
+//#define HEIGHT 240
 
 std::vector<float> interpolateSingleFloats(float from, float to, int numberOfValues) {
 	float total = 0;
@@ -81,21 +82,22 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	//Step 1: segment triangle into two
 	/*float maxXPoint = std::max({ triangle.v0().x,triangle.v1().x,triangle.v2().x });
 	float minXPoint = std::min({ triangle.v0().x,triangle.v1().x,triangle.v2().x });*/
-	
+
 	float maxYPoint = std::max({ triangle.v0().y,triangle.v1().y,triangle.v2().y });
 	float minYPoint = std::min({ triangle.v0().y,triangle.v1().y,triangle.v2().y });
-	float midYPoint;
+
 	CanvasPoint topPoint;
 	CanvasPoint bottomPoint;
+	CanvasPoint middlePoint;
 
-	std::cout << triangle.v0()<< std::endl;
+	std::cout << triangle.v0() << std::endl;
 	std::cout << triangle.v1() << std::endl;
 	std::cout << triangle.v2() << std::endl;
 
 
 	//finding middle then allocating top, middle and bottom points 
 	if (triangle.v0().y != minYPoint && triangle.v0().y != maxYPoint) {
-		midYPoint = triangle.v0().y;
+		middlePoint = triangle.v0();
 		if (triangle.v1().y == maxYPoint) {
 			bottomPoint = triangle.v1();
 			topPoint = triangle.v2();
@@ -103,12 +105,12 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 		else {
 			bottomPoint = triangle.v2();
 			topPoint = triangle.v1();
-			
+
 		}
 	}
 
 	else if (triangle.v1().y != minYPoint && triangle.v1().y != maxYPoint) {
-		midYPoint = triangle.v1().y;
+		middlePoint = triangle.v1();
 		if (triangle.v0().y == maxYPoint) {
 			bottomPoint = triangle.v0();
 			topPoint = triangle.v2();
@@ -119,7 +121,8 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 		}
 	}
 
-	else { midYPoint = triangle.v2().y;
+	else {
+		middlePoint = triangle.v2();
 		if (triangle.v0().y == maxYPoint) {
 			bottomPoint = triangle.v0();
 			topPoint = triangle.v1();
@@ -130,21 +133,40 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 		}
 	};
 	std::cout << topPoint << std::endl;
-	std::cout << midYPoint << std::endl;
+	std::cout << middlePoint << std::endl;
 	std::cout << bottomPoint << std::endl;
 
 	//Step 1.5: find gradient from top to bottom points to find x coordinate
-	float gradient = (bottomPoint.y - topPoint.y) / (bottomPoint.x - topPoint.x);
-	float midXPoint = (midYPoint-topPoint.y)/gradient;
+	float gradient;
+	float changeInX = bottomPoint.x - topPoint.x;
+	gradient = (bottomPoint.y - topPoint.y) / (changeInX);
+
+	if (gradient == 0) {
+		return;
+	}
+	float midXPoint = (middlePoint.y - topPoint.y) / gradient;
 	float actualX = midXPoint + topPoint.x;
 
-	std::cout << "mid x point: "; 
+	CanvasPoint lineStart;
+	CanvasPoint lineEnd;
+	lineStart.x = actualX;
+	lineStart.y = middlePoint.y;
+	lineEnd.x = middlePoint.x;
+	lineEnd.y = middlePoint.y;
+
+	std::cout << "mid x point: ";
 	std::cout << actualX;
-	
-	//Step 2: fill flat bottom triangles
+	Colour WHITE(255, 255, 255);
 
-	//Step 3: draw stroked white triangle on top of filled triangle
-
+	if (middlePoint.y == topPoint.y) {
+		drawLine(window, middlePoint, topPoint, WHITE);
+	}
+	else if (middlePoint.y == bottomPoint.y){
+		drawLine(window, middlePoint, bottomPoint, WHITE);
+	}
+	else {
+		drawLine(window, lineStart, lineEnd, WHITE);
+	}
 }
 //test for git
 
@@ -177,7 +199,7 @@ void draw(DrawingWindow& window) {
 
 void handleEvent(SDL_Event event, DrawingWindow& window) {
 	CanvasTriangle triangle(CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height));
-	//CanvasTriangle triangle(CanvasPoint(70,100),CanvasPoint(50,10),CanvasPoint(30,30));
+	//CanvasTriangle triangle(CanvasPoint(500,700),CanvasPoint(400,200),CanvasPoint(100,700));
 	Colour COLOUR = Colour(rand()%255, rand()%255, rand()%255);
 
 	if (event.type == SDL_KEYDOWN) {
