@@ -8,6 +8,7 @@
 #include <CanvasPoint.h>
 #include <Colour.h>
 #include <CanvasTriangle.h>
+#include <algorithm>
 
 #define WIDTH 320
 #define HEIGHT 240
@@ -73,6 +74,78 @@ void drawStrokedTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour 
 	drawLine(window, triangle.v2(), triangle.v0(), colour);
 }
 
+void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour colour) {
+	drawLine(window, triangle.v0(), triangle.v1(), colour);
+	drawLine(window, triangle.v1(), triangle.v2(), colour);
+	drawLine(window, triangle.v2(), triangle.v0(), colour);
+	//Step 1: segment triangle into two
+	/*float maxXPoint = std::max({ triangle.v0().x,triangle.v1().x,triangle.v2().x });
+	float minXPoint = std::min({ triangle.v0().x,triangle.v1().x,triangle.v2().x });*/
+	
+	float maxYPoint = std::max({ triangle.v0().y,triangle.v1().y,triangle.v2().y });
+	float minYPoint = std::min({ triangle.v0().y,triangle.v1().y,triangle.v2().y });
+	float midYPoint;
+	CanvasPoint topPoint;
+	CanvasPoint bottomPoint;
+
+	std::cout << triangle.v0()<< std::endl;
+	std::cout << triangle.v1() << std::endl;
+	std::cout << triangle.v2() << std::endl;
+
+
+	//finding middle then allocating top, middle and bottom points 
+	if (triangle.v0().y != minYPoint && triangle.v0().y != maxYPoint) {
+		midYPoint = triangle.v0().y;
+		if (triangle.v1().y == maxYPoint) {
+			bottomPoint = triangle.v1();
+			topPoint = triangle.v2();
+		}
+		else {
+			bottomPoint = triangle.v2();
+			topPoint = triangle.v1();
+			
+		}
+	}
+
+	else if (triangle.v1().y != minYPoint && triangle.v1().y != maxYPoint) {
+		midYPoint = triangle.v1().y;
+		if (triangle.v0().y == maxYPoint) {
+			bottomPoint = triangle.v0();
+			topPoint = triangle.v2();
+		}
+		else {
+			bottomPoint = triangle.v2();
+			topPoint = triangle.v0();
+		}
+	}
+
+	else { midYPoint = triangle.v2().y;
+		if (triangle.v0().y == maxYPoint) {
+			bottomPoint = triangle.v0();
+			topPoint = triangle.v1();
+		}
+		else {
+			bottomPoint = triangle.v1();
+			topPoint = triangle.v0();
+		}
+	};
+	std::cout << topPoint << std::endl;
+	std::cout << midYPoint << std::endl;
+	std::cout << bottomPoint << std::endl;
+
+	//Step 1.5: find gradient from top to bottom points to find x coordinate
+	float gradient = (bottomPoint.y - topPoint.y) / (bottomPoint.x - topPoint.x);
+	float midXPoint = (midYPoint-topPoint.y)/gradient;
+	float actualX = midXPoint + topPoint.x;
+
+	std::cout << "mid x point: "; 
+	std::cout << actualX;
+	
+	//Step 2: fill flat bottom triangles
+
+	//Step 3: draw stroked white triangle on top of filled triangle
+
+}
 //test for git
 
 void draw(DrawingWindow& window) {
@@ -104,7 +177,8 @@ void draw(DrawingWindow& window) {
 
 void handleEvent(SDL_Event event, DrawingWindow& window) {
 	CanvasTriangle triangle(CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height));
-	Colour BLACK = Colour(rand()%255, rand()%255, rand()%255);
+	//CanvasTriangle triangle(CanvasPoint(70,100),CanvasPoint(50,10),CanvasPoint(30,30));
+	Colour COLOUR = Colour(rand()%255, rand()%255, rand()%255);
 
 	if (event.type == SDL_KEYDOWN) {
 		if (event.key.keysym.sym == SDLK_LEFT) std::cout << "LEFT" << std::endl;
@@ -113,7 +187,11 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 		else if (event.key.keysym.sym == SDLK_DOWN) std::cout << "DOWN" << std::endl;
 		else if (event.key.keysym.sym == SDLK_u) {
 			std::cout << "u" << std::endl;
-			drawStrokedTriangle(window, triangle, BLACK);
+			drawStrokedTriangle(window, triangle, COLOUR);
+		}
+		else if (event.key.keysym.sym == SDLK_f) {
+			std::cout << "top middle then bottom points" << std::endl;
+			drawFilledTriangle(window, triangle, COLOUR);
 		}
 	}
 	else if (event.type == SDL_MOUSEBUTTONDOWN) {
@@ -123,6 +201,8 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 }
 
 int main(int argc, char* argv[]) {
+	//Ensuring randomness
+	srand((unsigned int)time(NULL));
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
 	std::vector<float> result;
