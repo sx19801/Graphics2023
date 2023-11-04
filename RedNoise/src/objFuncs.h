@@ -109,7 +109,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 			singleSetVertices.z = scalingFactor * z;
 
 			multiSetVertices.push_back(singleSetVertices);
-
+			
 		}
 
 		else if (identifier == "f") {

@@ -31,6 +31,10 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 verte
 	CanvasPoint imagePlanePoint;
 	imagePlanePoint.x = (focalLength * (vertexPosition.x / distZ));
 	imagePlanePoint.y = (focalLength * ((-vertexPosition.y) / distZ));
+
+
+	//assigning depth from z
+	imagePlanePoint.depth = vertexPosition.z;
 	
 	return imagePlanePoint;
 }
@@ -86,12 +90,24 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 			for (size_t i = 0; i < triangles3D.size(); i++) {
 				for (size_t j = 0; j < 3; j++) {
 					vertexPosition = triangles3D[i].vertices[j];
+					
 					imagePlanePoint = getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
 					//rescaleVertexPosition = {vertexPosition.x * secScalingFactorY, vertexPosition.y *secScalingFactorY, vertexPosition.z};
+
+					//these the ones i need to be checking
 					imagePlanePointScaled.x = round((imagePlanePoint.x * secScalingFactorY)) + (WIDTH / 2);
 					imagePlanePointScaled.y = round((imagePlanePoint.y * secScalingFactorY)) + (HEIGHT / 2);
 
+
+
+
+					//I THINK THIS IS CORRECT FOR SETTING THE DEPTH \/    \/    \/    \/     \/    \/   
+					//zDepth[int(imagePlanePointScaled.x)][int(imagePlanePointScaled.y)] = (1/imagePlanePoint.depth);
+
+
+
 					triangle2D.vertices[j] = imagePlanePointScaled;
+					
 					
 					imagePlanePoints.push_back(imagePlanePointScaled);
 					_sleep(100);
@@ -102,6 +118,9 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 					//std::cout << "just checking this shit works" << i << " <- thats i " << j << " <- and thats j" << std::endl;
 				}
 				
+				//zDepthBufferInterpolations(triangles3D);
+
+
 				triangles2D.push_back(triangle2D);
 				//drawStrokedTriangle(window, triangles2D[i], WHITE);
 				drawFilledTriangle(window, triangles2D[i], triangles3D[i].colour);

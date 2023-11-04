@@ -17,6 +17,9 @@
 #include <map>
 #include <algorithm>
 
+
+
+
 std::vector<float> interpolateSingleFloats(float from, float to, int numberOfValues) {
 	float total = 0;
 	float spacing;
@@ -52,6 +55,20 @@ std::vector<glm::vec3> interpolateThreeElementValues(glm::vec3 from, glm::vec3 t
 }
 
 
+//void zDepthBufferInterpolations(std::vector<ModelTriangle> triangles3D) {
+//	
+//	ModelTriangle currentTriangle3D;
+//
+//	for (size_t i = 0; i < triangles3D.size(); i++) {
+//		currentTriangle3D = triangles3D[i];
+//		currentTriangle3D.vertices[i][2];
+//		;
+//		
+//	}
+//}
+
+
+
 void triangleTextureMap() {
 
 }
@@ -70,6 +87,11 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 	for (int i = 0; i <= numberOfSteps; i++) {
 		float x = fromX + (xStepSize * i);
 		float y = fromY + (yStepSize * i);
+
+		
+
+
+
 		window.setPixelColour(x, y, COLOUR);
 	}
 }
@@ -92,6 +114,7 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	float maxYPoint = std::max({ triangle.v0().y,triangle.v1().y,triangle.v2().y });
 	float minYPoint = std::min({ triangle.v0().y,triangle.v1().y,triangle.v2().y });
 
+	
 	CanvasPoint topPoint;
 	CanvasPoint bottomPoint;
 	CanvasPoint middlePoint;
@@ -207,6 +230,9 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	std::vector<float> topRightXArray = interpolateSingleFloats(topPoint.x, rightMidPoint, changeInYTop);
 	std::vector<float> botLeftXArray = interpolateSingleFloats(leftMidPoint, bottomPoint.x, changeInYBot);
 	std::vector<float> botRightXArray = interpolateSingleFloats(rightMidPoint, bottomPoint.x, changeInYBot);
+
+	std::vector<float> topLeftZArray = interpolateSingleFloats(topPoint.depth, middlePoint.depth, changeInYTop);
+	std::vector<float> topRightZArray = interpolateSingleFloats(topPoint.depth, middlePoint.depth, changeInYTop);
 
 	//FILL TOP TRIANGLE
 	for (size_t i = 0; i < changeInYTop; i++) {
