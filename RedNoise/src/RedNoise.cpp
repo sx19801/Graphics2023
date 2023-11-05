@@ -40,8 +40,8 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 verte
 }
 
 void handleEvent(SDL_Event event, DrawingWindow& window) {
-	//CanvasTriangle triangle(CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height));
-	CanvasTriangle triangle(CanvasPoint(200, 300), CanvasPoint(600, 100), CanvasPoint(500, 300));
+	CanvasTriangle triangle(CanvasPoint(rand() % window.width, rand() % window.height, 0.5), CanvasPoint(rand() % window.width, rand() % window.height, 0.2), CanvasPoint(rand() % window.width, rand() % window.height, 0.7));
+	//CanvasTriangle triangle(CanvasPoint(200, 300), CanvasPoint(600, 100), CanvasPoint(500, 300));
 	//CanvasTriangle triangle(CanvasPoint(50,10),CanvasPoint(20,16),CanvasPoint(80,16));
 	Colour COLOUR = Colour(rand() % 255, rand() % 255, rand() % 255);
 	Colour WHITE = Colour(255, 255, 255);
@@ -94,11 +94,14 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 					imagePlanePoint = getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
 					//rescaleVertexPosition = {vertexPosition.x * secScalingFactorY, vertexPosition.y *secScalingFactorY, vertexPosition.z};
 
+
+
+
 					//these the ones i need to be checking
 					imagePlanePointScaled.x = round((imagePlanePoint.x * secScalingFactorY)) + (WIDTH / 2);
 					imagePlanePointScaled.y = round((imagePlanePoint.y * secScalingFactorY)) + (HEIGHT / 2);
 
-
+					imagePlanePointScaled.depth = vertexPosition.z;
 
 
 					//I THINK THIS IS CORRECT FOR SETTING THE DEPTH \/    \/    \/    \/     \/    \/   

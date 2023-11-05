@@ -18,6 +18,7 @@
 #include <algorithm>
 
 
+float zBuffer[960][720] = {};
 
 
 std::vector<float> interpolateSingleFloats(float from, float to, int numberOfValues) {
@@ -55,17 +56,17 @@ std::vector<glm::vec3> interpolateThreeElementValues(glm::vec3 from, glm::vec3 t
 }
 
 
-//void zDepthBufferInterpolations(std::vector<ModelTriangle> triangles3D) {
-//	
-//	ModelTriangle currentTriangle3D;
-//
-//	for (size_t i = 0; i < triangles3D.size(); i++) {
-//		currentTriangle3D = triangles3D[i];
-//		currentTriangle3D.vertices[i][2];
-//		;
-//		
-//	}
-//}
+void zDepthBufferInterpolations(CanvasPoint from, CanvasPoint to, Colour colour) {
+	
+	ModelTriangle currentTriangle3D;
+
+	/*for (size_t i = 0; i < triangles3D.size(); i++) {
+		currentTriangle3D = triangles3D[i];
+		currentTriangle3D.vertices[i][2];
+		;
+		
+	}*/
+}
 
 
 
@@ -74,6 +75,7 @@ void triangleTextureMap() {
 }
 
 void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour colour) {
+	std::vector<float> zInterpolation;
 	float toX = round(to.x);
 	float fromX = round(from.x);
 	float toY = round(to.y);
@@ -84,15 +86,27 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 	float xStepSize = xDiff / numberOfSteps;
 	float yStepSize = yDiff / numberOfSteps;
 	uint32_t COLOUR = (0 << 24) + (int(colour.red) << 16) + (int(colour.green) << 8) + int(colour.blue);
+	
+	zInterpolation = interpolateSingleFloats(from.depth, to.depth, numberOfSteps+1);
+	
 	for (int i = 0; i <= numberOfSteps; i++) {
-		float x = fromX + (xStepSize * i);
-		float y = fromY + (yStepSize * i);
-
-		
-
+		CanvasPoint xy;
+ 		xy.x = fromX + (xStepSize * i);
+		xy.y = fromY + (yStepSize * i);
 
 
-		window.setPixelColour(x, y, COLOUR);
+		xy.depth = zInterpolation[i];
+
+		//if (zBuffer[int(xy.x)][int(xy.y)] < 1/xy.depth)
+		//{
+		//	zBuffer[int(xy.x)][int(xy.y)] = 1/xy.depth;
+		//	window.setPixelColour(xy.x, xy.y, COLOUR);
+		//}
+		//else if (zBuffer[int(xy.x)][int(xy.y)] > 1/xy.depth) {
+		//	//do nothing
+		//}
+
+		window.setPixelColour(xy.x, xy.y, COLOUR);
 	}
 }
 
@@ -105,9 +119,9 @@ void drawStrokedTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour 
 
 
 void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour colour) {
-	drawLine(window, triangle.v0(), triangle.v1(), colour);
+	/*drawLine(window, triangle.v0(), triangle.v1(), colour);
 	drawLine(window, triangle.v1(), triangle.v2(), colour);
-	drawLine(window, triangle.v2(), triangle.v0(), colour);
+	drawLine(window, triangle.v2(), triangle.v0(), colour);*/
 
 	//Step 1: segment triangle into two
 
@@ -193,32 +207,54 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 		}
 	};
 
-	std::cout << topPoint << std::endl;
+	/*std::cout << topPoint << std::endl;
 	std::cout << middlePoint << std::endl;
-	std::cout << bottomPoint << std::endl;
+	std::cout << bottomPoint << std::endl;*/
+
+	std::cout << topPoint.depth << " <- this the depth of top point" << std::endl;
 
 	//Step 1.5: find gradient from top to bottom points to find x coordinate
 	float gradient;
 	float changeInX = bottomPoint.x - topPoint.x;
 	gradient = (bottomPoint.y - topPoint.y) / (changeInX);
+	float changeInY = bottomPoint.y - topPoint.y;
+	float changeInZ = bottomPoint.depth - topPoint.depth;
 
 	//prevents bugging out if grad = 0
 	if (gradient == 0) {
 		return;
 	}
 
+	//trying ratios instead
+	float ratio = (bottomPoint.y - middlePoint.y)/changeInY;
+	float actualX2 = bottomPoint.x - changeInX*ratio;
+
+	//use ratio to calulate the z of new middle point
+	float actualZ = bottomPoint.depth - changeInZ * ratio;
+
+	std::cout << "this the new one actualX2: " << actualX2 << std::endl;
+	std::cout << "this the z new mid point: " << actualZ << std::endl;
+
+	//
+
+
+	
+	//this old shit
 	float midXPoint = (middlePoint.y - topPoint.y) / gradient;
 	float actualX = midXPoint + topPoint.x;
+	
 	float leftMidPoint;
 	float rightMidPoint;
 
+	std::cout << "this the old one actualX: " << actualX << std::endl;
+
 	//assigning left and right mid points
-	if (actualX > middlePoint.x) {
+	if (actualX2 > middlePoint.x) {
 		leftMidPoint = middlePoint.x;
-		rightMidPoint = actualX;
+		rightMidPoint = actualX2;
 	}
 	else {
-		leftMidPoint = actualX;
+		leftMidPoint = actualX2;
 		rightMidPoint = middlePoint.x;
 	}
 
@@ -239,6 +275,8 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 
 		CanvasPoint LineStart(round(topLeftXArray[i]), round((topPoint.y) + i));
 		CanvasPoint LineEnd(round(topRightXArray[i]), round((topPoint.y) + i));
+
+		
 
 		drawLine(window, LineStart, LineEnd, colour);
 	}
