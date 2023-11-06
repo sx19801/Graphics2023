@@ -18,6 +18,7 @@
 #include <algorithm>
 
 
+//initalising zbuffer with height and width of screen
 float zBuffer[960][720] = {};
 
 
@@ -28,6 +29,12 @@ std::vector<float> interpolateSingleFloats(float from, float to, int numberOfVal
 	std::vector<float> evenVector;
 	total = to - from;
 	spacing = total / (numberOfValues - 1);
+	
+	//avoiding fringe case of single point
+	if (numberOfValues == 1) {
+		evenVector.push_back(from);
+		return evenVector;
+	}
 
 	for (int i = 0; i < numberOfValues; i++) {
 		evenVector.push_back(from + spacing * i);
@@ -68,8 +75,6 @@ void zDepthBufferInterpolations(CanvasPoint from, CanvasPoint to, Colour colour)
 	}*/
 }
 
-
-
 void triangleTextureMap() {
 
 }
@@ -91,22 +96,34 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 	
 	for (int i = 0; i <= numberOfSteps; i++) {
 		CanvasPoint xy;
- 		xy.x = fromX + (xStepSize * i);
-		xy.y = fromY + (yStepSize * i);
 
+		if (numberOfSteps == 0) {
+			xy.x = fromX;
+			xy.y = fromY;
+		}
+		else {
+			xy.x = fromX + (xStepSize * i);
+			xy.y = fromY + (yStepSize * i);
+		}
 
 		xy.depth = zInterpolation[i];
+		//std::cout << "z depth in drawLine func" << zInterpolation[i] << std::endl;
 
-		//if (zBuffer[int(xy.x)][int(xy.y)] < 1/xy.depth)
-		//{
-		//	zBuffer[int(xy.x)][int(xy.y)] = 1/xy.depth;
-		//	window.setPixelColour(xy.x, xy.y, COLOUR);
-		//}
-		//else if (zBuffer[int(xy.x)][int(xy.y)] > 1/xy.depth) {
-		//	//do nothing
-		//}
+		
+		if ((zBuffer[int(xy.x)][int(xy.y)] != 0) && (zBuffer[int(xy.x)][int(xy.y)] > 1/xy.depth))
+		{
+			zBuffer[int(xy.x)][int(xy.y)] = 1/xy.depth;
+			window.setPixelColour(xy.x, xy.y, COLOUR);
+		} 
+		else if (zBuffer[int(xy.x)][int(xy.y)] == 0){
+			zBuffer[int(xy.x)][int(xy.y)] = 1 / xy.depth;
+			window.setPixelColour(xy.x, xy.y, COLOUR);
+		}
+		else if (zBuffer[int(xy.x)][int(xy.y)] < 1/xy.depth) {
+			//do nothing
+		}
 
-		window.setPixelColour(xy.x, xy.y, COLOUR);
+		//window.setPixelColour(xy.x, xy.y, COLOUR);
 	}
 }
 
@@ -211,7 +228,7 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	std::cout << middlePoint << std::endl;
 	std::cout << bottomPoint << std::endl;*/
 
-	std::cout << topPoint.depth << " <- this the depth of top point" << std::endl;
+	//std::cout << topPoint.depth << " <- this the depth of top point" << std::endl;
 
 	//Step 1.5: find gradient from top to bottom points to find x coordinate
 	float gradient;
@@ -227,35 +244,27 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 
 	//trying ratios instead
 	float ratio = (bottomPoint.y - middlePoint.y)/changeInY;
-	float actualX2 = bottomPoint.x - changeInX*ratio;
-
-	//use ratio to calulate the z of new middle point
-	float actualZ = bottomPoint.depth - changeInZ * ratio;
-
-	std::cout << "this the new one actualX2: " << actualX2 << std::endl;
-	std::cout << "this the z new mid point: " << actualZ << std::endl;
-
-	//
-
-
-	
-	//this old shit
-	float midXPoint = (middlePoint.y - topPoint.y) / gradient;
-	float actualX = midXPoint + topPoint.x;
+	float newMidPointX = bottomPoint.x - changeInX*ratio;
+	float newMidPointZ = bottomPoint.depth - changeInZ*ratio;
+	//std::cout << "this the new one actualX2: " << newMidPointX << std::endl;
 	
 	float leftMidPoint;
 	float rightMidPoint;
-
-	std::cout << "this the old one actualX: " << actualX << std::endl;
+	float leftMidPointDepth;
+	float rightMidPointDepth;
 
 	//assigning left and right mid points
-	if (actualX2 > middlePoint.x) {
+	if (newMidPointX > middlePoint.x) {
 		leftMidPoint = middlePoint.x;
-		rightMidPoint = actualX2;
+		rightMidPoint = newMidPointX;
+		leftMidPointDepth = middlePoint.depth;
+		rightMidPointDepth = newMidPointZ;
 	}
 	else {
-		leftMidPoint = actualX2;
+		leftMidPoint = newMidPointX;
 		rightMidPoint = middlePoint.x;
+		leftMidPointDepth = newMidPointZ;
+		rightMidPointDepth = middlePoint.depth;
 	}
 
 	//THIS IS THE RIGHT BIT MAN PLEASE HOLY PLEASE
@@ -267,14 +276,21 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	std::vector<float> botLeftXArray = interpolateSingleFloats(leftMidPoint, bottomPoint.x, changeInYBot);
 	std::vector<float> botRightXArray = interpolateSingleFloats(rightMidPoint, bottomPoint.x, changeInYBot);
 
-	std::vector<float> topLeftZArray = interpolateSingleFloats(topPoint.depth, middlePoint.depth, changeInYTop);
-	std::vector<float> topRightZArray = interpolateSingleFloats(topPoint.depth, middlePoint.depth, changeInYTop);
+	//maybe make the z arrays global? \/ \/ \/ 
+	std::vector<float> topLeftZArray = interpolateSingleFloats(topPoint.depth, leftMidPointDepth, changeInYTop);
+	std::vector<float> topRightZArray = interpolateSingleFloats(topPoint.depth, rightMidPointDepth, changeInYTop);
+	std::vector<float> botLeftZArray = interpolateSingleFloats(leftMidPointDepth, bottomPoint.depth, changeInYBot);
+	std::vector<float> botRightZArray = interpolateSingleFloats(rightMidPointDepth, bottomPoint.depth, changeInYBot);
+
+	//for (size_t i = 0; i < topLeftZArray.size(); i++) { std::cout << "this the top left z array all elements: " << topLeftZArray[i] << std::endl; }
 
 	//FILL TOP TRIANGLE
 	for (size_t i = 0; i < changeInYTop; i++) {
 
-		CanvasPoint LineStart(round(topLeftXArray[i]), round((topPoint.y) + i));
-		CanvasPoint LineEnd(round(topRightXArray[i]), round((topPoint.y) + i));
+		CanvasPoint LineStart(round(topLeftXArray[i]), round((topPoint.y) + i), topLeftZArray[i]);
+		CanvasPoint LineEnd(round(topRightXArray[i]), round((topPoint.y) + i), topRightZArray[i]);
+
+		//zBuffer[][] = 
 
 		
 
@@ -284,38 +300,21 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	//FILL BOT TRIANGLE
 	for (size_t i = 0; i < changeInYBot; i++) {
 
-		CanvasPoint LineStart(botLeftXArray[i], (middlePoint.y) + i);
-		CanvasPoint LineEnd(botRightXArray[i], (middlePoint.y) + i);
+		CanvasPoint LineStart(botLeftXArray[i], (middlePoint.y) + i, botLeftZArray[i]);
+		CanvasPoint LineEnd(botRightXArray[i], (middlePoint.y) + i, botRightZArray[i]);
 
 		drawLine(window, LineStart, LineEnd, colour);
 	}
 
 	CanvasPoint testLineStart;
 	CanvasPoint testLineEnd;
-	testLineStart.x = actualX;
+	testLineStart.x = newMidPointX;
 	testLineStart.y = middlePoint.y;
 	testLineEnd.x = middlePoint.x;
 	testLineEnd.y = middlePoint.y;
 
-	std::cout << "mid x point: ";
-	std::cout << actualX;
-	Colour WHITE(255, 255, 255);
-
-	/*drawLine(window, triangle.v0(), triangle.v1(), WHITE);
-	drawLine(window, triangle.v1(), triangle.v2(), WHITE);
-	drawLine(window, triangle.v2(), triangle.v0(), WHITE);*/
-	//filling top triangle 
-
-	float difInY = middlePoint.y - topPoint.y;
-
-	//testing interpolation
-	glm::vec3 interpTopPoint(topPoint.x, topPoint.y, 0);
-	glm::vec3 interpLeftMidPoint(leftMidPoint, middlePoint.y, 0);
-	glm::vec3 interpRightMidPoint(rightMidPoint, middlePoint.y, 0);
-
-	std::vector<glm::vec3> leftLineResult = interpolateThreeElementValues(interpTopPoint, interpLeftMidPoint, difInY);
-	std::vector<glm::vec3> rightLineResult = interpolateThreeElementValues(interpTopPoint, interpRightMidPoint, difInY);
-	std::vector<glm::vec3> leftArrayNoDupes;
+	//std::cout << "mid x point: ";
+	//std::cout << newMidPointX;
 }
 
 int counter = 0;

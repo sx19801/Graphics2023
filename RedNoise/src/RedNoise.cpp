@@ -101,7 +101,8 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 					imagePlanePointScaled.x = round((imagePlanePoint.x * secScalingFactorY)) + (WIDTH / 2);
 					imagePlanePointScaled.y = round((imagePlanePoint.y * secScalingFactorY)) + (HEIGHT / 2);
 
-					imagePlanePointScaled.depth = vertexPosition.z;
+					//+1 since some of the z values are negative so make all positive (instead of from -1 to 1 the values are now 0 to 2)
+					imagePlanePointScaled.depth = vertexPosition.z + 1;
 
 
 					//I THINK THIS IS CORRECT FOR SETTING THE DEPTH \/    \/    \/    \/     \/    \/   
@@ -114,7 +115,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 					
 					imagePlanePoints.push_back(imagePlanePointScaled);
 					_sleep(100);
-					std::cout << "image plane points: " << imagePlanePointScaled.x << " " << imagePlanePointScaled.y << std::endl;
+					//std::cout << "image plane points: " << imagePlanePointScaled.x << " " << imagePlanePointScaled.y << std::endl;
 					//draw(window, imagePlanePointScaled.x, imagePlanePointScaled.y);
 					//drawStrokedTriangle(window, );
 					//std::cout << "this is the image plane point x: " << imagePlanePoint.x << " this the y: " << imagePlanePoint.y << std::endl;
