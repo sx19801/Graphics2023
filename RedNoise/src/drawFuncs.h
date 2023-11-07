@@ -79,7 +79,7 @@ void triangleTextureMap() {
 
 }
 
-void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour colour) {
+void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour colour, bool reset) {
 	std::vector<float> zInterpolation;
 	float toX = round(to.x);
 	float fromX = round(from.x);
@@ -110,17 +110,23 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 		//std::cout << "z depth in drawLine func" << zInterpolation[i] << std::endl;
 
 		
-		if ((zBuffer[int(xy.x)][int(xy.y)] != 0) && (zBuffer[int(xy.x)][int(xy.y)] > 1/xy.depth))
+		if ((zBuffer[int(xy.x)][int(xy.y)] != 0) && (zBuffer[int(xy.x)][int(xy.y)] > 1/xy.depth) && (reset == false))
 		{
 			zBuffer[int(xy.x)][int(xy.y)] = 1/xy.depth;
 			window.setPixelColour(xy.x, xy.y, COLOUR);
 		} 
-		else if (zBuffer[int(xy.x)][int(xy.y)] == 0){
+		else if ((zBuffer[int(xy.x)][int(xy.y)] == 0) && (reset == false)){
 			zBuffer[int(xy.x)][int(xy.y)] = 1 / xy.depth;
 			window.setPixelColour(xy.x, xy.y, COLOUR);
 		}
-		else if (zBuffer[int(xy.x)][int(xy.y)] < 1/xy.depth) {
+		else if ((zBuffer[int(xy.x)][int(xy.y)] < 1/xy.depth) && (reset == false)) {
 			//do nothing
+		}
+		else if (reset == true) {
+			uint32_t BLACK = (255 << 24) + (0 << 16) + (0 << 8) + 0;
+			window.setPixelColour(xy.x, xy.y, BLACK);
+			zBuffer[int(xy.x)][int(xy.y)] = 0;
+			
 		}
 
 		//window.setPixelColour(xy.x, xy.y, COLOUR);
@@ -129,9 +135,10 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 
 void drawStrokedTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour colour) {
 	//std::cout << triangle.v0();
-	drawLine(window, triangle.v0(), triangle.v1(), colour);
-	drawLine(window, triangle.v1(), triangle.v2(), colour);
-	drawLine(window, triangle.v2(), triangle.v0(), colour);
+	bool reset = false;
+	drawLine(window, triangle.v0(), triangle.v1(), colour, reset);
+	drawLine(window, triangle.v1(), triangle.v2(), colour, reset);
+	drawLine(window, triangle.v2(), triangle.v0(), colour, reset);
 }
 
 
@@ -285,6 +292,7 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	//for (size_t i = 0; i < topLeftZArray.size(); i++) { std::cout << "this the top left z array all elements: " << topLeftZArray[i] << std::endl; }
 
 	//FILL TOP TRIANGLE
+	bool reset = false;
 	for (size_t i = 0; i < changeInYTop; i++) {
 
 		CanvasPoint LineStart(round(topLeftXArray[i]), round((topPoint.y) + i), topLeftZArray[i]);
@@ -293,8 +301,7 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 		//zBuffer[][] = 
 
 		
-
-		drawLine(window, LineStart, LineEnd, colour);
+		drawLine(window, LineStart, LineEnd, colour, reset);
 	}
 
 	//FILL BOT TRIANGLE
@@ -303,7 +310,7 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 		CanvasPoint LineStart(botLeftXArray[i], (middlePoint.y) + i, botLeftZArray[i]);
 		CanvasPoint LineEnd(botRightXArray[i], (middlePoint.y) + i, botRightZArray[i]);
 
-		drawLine(window, LineStart, LineEnd, colour);
+		drawLine(window, LineStart, LineEnd, colour, reset);
 	}
 
 	CanvasPoint testLineStart;

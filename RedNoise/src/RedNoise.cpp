@@ -14,11 +14,11 @@
 #include"drawFuncs.h"
 
 
-#define WIDTH 960
-#define HEIGHT 720
+//#define WIDTH 960
+//#define HEIGHT 720
 
-//#define WIDTH 320
-//#define HEIGHT 240
+#define WIDTH 320
+#define HEIGHT 240
 
 CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 vertexPosition, float focalLength) {
 	//function to calculate 2D canvaspoint on image plane
@@ -46,7 +46,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 	Colour COLOUR = Colour(rand() % 255, rand() % 255, rand() % 255);
 	Colour WHITE = Colour(255, 255, 255);
 	float scalingFactor = 0.35;
-	float secScalingFactorY = 120;
+	float secScalingFactorY = 60;
 	float secScalingFactorX = 360;
 	glm::vec3 cameraPosition = {0.0, 0.0, 4.0};
 	glm::vec3 vertexPosition;
@@ -64,6 +64,28 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 		else if (event.key.keysym.sym == SDLK_RIGHT) std::cout << "RIGHT" << std::endl;
 		else if (event.key.keysym.sym == SDLK_UP) std::cout << "UP" << std::endl;
 		else if (event.key.keysym.sym == SDLK_DOWN) std::cout << "DOWN" << std::endl;
+		else if (event.key.keysym.sym == SDLK_c) {
+			CanvasPoint from(0,0,10);
+			CanvasPoint to(WIDTH-1,0, 10);
+			Colour BLACK(0, 0, 0);
+			//for (size_t i = 0; i < HEIGHT; i++) {
+			bool reset = true;
+			for (size_t j = 0; j < HEIGHT; j++) {
+				//CanvasPoint from2;
+					
+				from.y = j;
+				to.y = j;
+				//from2.depth = 10;
+				//uint32_t BLACK = (255 << 24) + (0 << 16) + (0 << 8) + 0;
+				drawLine(window,from,to,BLACK, reset);
+				
+
+				//window.setPixelColour(j, i, BLACK);
+				//window.renderFrame();
+			}
+			reset = false;
+			//}
+		}
 		else if (event.key.keysym.sym == SDLK_u) {
 			std::cout << "u" << std::endl;
 			drawStrokedTriangle(window, triangle, COLOUR);
@@ -114,7 +136,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 					
 					
 					imagePlanePoints.push_back(imagePlanePointScaled);
-					_sleep(100);
+					//_sleep(100);
 					//std::cout << "image plane points: " << imagePlanePointScaled.x << " " << imagePlanePointScaled.y << std::endl;
 					//draw(window, imagePlanePointScaled.x, imagePlanePointScaled.y);
 					//drawStrokedTriangle(window, );

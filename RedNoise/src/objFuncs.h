@@ -60,11 +60,11 @@ void loadMatOBJ() {
 	}
 
 
-	for (auto const& pair : colourMap) {																//print out all elements in hash map
-		std::cout << "{" << pair.first << ": " << glm::to_string(pair.second) << "}\n";
-	}
+	//for (auto const& pair : colourMap) {																//print out all elements in hash map
+		//std::cout << "{" << pair.first << ": " << glm::to_string(pair.second) << "}\n";
+	//}
 
-	std::cout << colourMap.size() << std::endl;
+	//std::cout << colourMap.size() << std::endl;
 }
 
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
