@@ -44,7 +44,7 @@ void loadMatOBJ() {
 			ss >> a;
 			name = a;
 			colourMap[a] = {};
-			std::cout << a << " << a" << std::endl;
+			//std::cout << a << " << a" << std::endl;
 
 		}
 		else if (identifier == "Kd") {
@@ -59,12 +59,9 @@ void loadMatOBJ() {
 
 	}
 
-
 	//for (auto const& pair : colourMap) {																//print out all elements in hash map
 		//std::cout << "{" << pair.first << ": " << glm::to_string(pair.second) << "}\n";
 	//}
-
-	//std::cout << colourMap.size() << std::endl;
 }
 
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
@@ -83,8 +80,6 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 		std::stringstream ss(myText);
 		std::string identifier;
 		ss >> identifier;
-		//USING SPLIT FUNC INSTEAD OF STRINGSTREAM
-		//std::vector<std::string> newText = split(myText, ' ');
 
 		//std::cout << newText[0] << std::endl;
 		//for (size_t i = 0; i < newText.size(); i++) std::cout << newText[i] << " " << std::endl;
@@ -94,15 +89,11 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 			colourNameGlobal = colourName;
 		}
 		else if (identifier == "v") {
-			//std::cout << myText << std::endl;
 
 			float x, y, z;
 			ss >> x >> y >> z;
 
 			//SCALING FACTOR INTRODUCED HERE
-			/*singleSetVertices.x = x;
-			singleSetVertices.y = y;
-			singleSetVertices.z = z;*/
 
 			singleSetVertices.x = scalingFactor * x;
 			singleSetVertices.y = scalingFactor * y;
@@ -117,7 +108,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 			char d;
 
 			while ((ss >> a >> d >> b >> d >> c) && d == '/') {
-				//std::cout << myText << std::endl;
+				
 
 				//std::cout << "new position (" << a << ", " << b << ", " << c << ")" << std::endl;
 
@@ -125,24 +116,11 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 				modelTriangle.vertices[1] = multiSetVertices[b - 1];
 				modelTriangle.vertices[2] = multiSetVertices[c - 1];
 
-				//std::cout << glm::to_string(colourMap[colourNameGlobal]) << " < this the colourmap yo" << std::endl;
-				
 				rgbValues = colourMap[colourNameGlobal];
-
-				//std::cout << glm::to_string(rgbValues) << std::endl;
-				/*rgbValues.r = colourMap[colourNameGlobal].r;
-				rgbValues.b = colourMap[colourNameGlobal].b;
-				rgbValues.g = colourMap[colourNameGlobal].g;*/
-
-				//rgbColour = {2 ,1 ,3 };
-				//rgbColour = { rgbValues.r, rgbValues.g, rgbValues.b };
 
 				rgbColour.red = rgbValues.r;
 				rgbColour.green = rgbValues.g;
 				rgbColour.blue = rgbValues.b;
-
-
-				//rgbColour( rgbValues.r, rgbValues.b, rgbValues.g);
 
 				modelTriangle.colour = rgbColour;
 				modelTriangle.colour.name = colourNameGlobal;
@@ -153,10 +131,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 		}
 
 	}
-	//for (size_t i = 0; i < multiSetVertices.size(); i++) { std::cout << glm::to_string(multiSetVertices[i]) << " <---- NEW SHIT <---" << std::endl; }
-
-	//seems to be working fine 
-
+	
 	MyReadFile.close();
 	return modelTriangles;
 }
