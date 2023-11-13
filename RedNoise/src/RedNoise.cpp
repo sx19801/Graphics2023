@@ -46,7 +46,7 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 verte
 	imagePlanePoint.y = (focalLength * (distance.y / distZ));
 
 	//assigning depth from z
-	imagePlanePoint.depth = vertexPosition.z;
+	imagePlanePoint.depth = distZ;
 	imagePlanePoint.x = imagePlanePoint.x;
 	return imagePlanePoint;
 }
@@ -67,7 +67,7 @@ void intersectionCalcsAndDrawing(glm::vec3 cameraPosition, std::vector<ModelTria
 			imagePlanePointScaled.y = round((imagePlanePoint.y * secScalingFactorY)) + (HEIGHT / 2);
 
 			//+1 since some of the z values are negative so make all positive (instead of from -1 to 1 the values are now 0 to 2)
-			imagePlanePointScaled.depth = vertexPosition.z + 1;
+			imagePlanePointScaled.depth = imagePlanePoint.depth;
 
 			triangle2D.vertices[j] = imagePlanePointScaled;
 
@@ -76,6 +76,7 @@ void intersectionCalcsAndDrawing(glm::vec3 cameraPosition, std::vector<ModelTria
 
 		triangles2D.push_back(triangle2D);
 		//drawStrokedTriangle(window, triangles2D[i], WHITE);
+		//_sleep(80);
 		drawFilledTriangle(window, triangles2D[i], triangles3D[i].colour);
 		
 	}
@@ -107,44 +108,29 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 	float degrees = 15;
 	float theta = degrees * (3.14159 / 180);
 
+	triangles3D = loadGeoOBJ(normalisingScalingFactor);
 
 	if (event.type == SDL_KEYDOWN) {
-		if (event.key.keysym.sym == SDLK_LEFT) {
-			std::cout << "LEFT" << std::endl;
+		if (event.key.keysym.sym == SDLK_RIGHT) {
+			std::cout << "RIGHT" << std::endl;
 			bool reset = true;
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 
 			cameraPosition.x = cameraPosition.x + 0.5;
-			
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
 			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
 			window.renderFrame();
 		}
-		else if (event.key.keysym.sym == SDLK_RIGHT) {
-			std::cout << "RIGHT" << std::endl;
+		else if (event.key.keysym.sym == SDLK_LEFT) {
+			std::cout << "LEFT" << std::endl;
 
 			bool reset = true;
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 
 			cameraPosition.x = cameraPosition.x - 0.5;
 			
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
-			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
-			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
-
-			window.renderFrame();
-		}
-		else if (event.key.keysym.sym == SDLK_UP) {
-			std::cout << "UP" << std::endl;
-
-			bool reset = true;
-			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
-
-			cameraPosition.y = cameraPosition.y - 0.5;
-			loadMatOBJ();
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
 			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
@@ -152,12 +138,24 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 		}
 		else if (event.key.keysym.sym == SDLK_DOWN) {
 			std::cout << "DOWN" << std::endl;
+
+			bool reset = true;
+			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
+
+			cameraPosition.y = cameraPosition.y - 0.5;
+
+			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
+
+			window.renderFrame();
+		}
+		else if (event.key.keysym.sym == SDLK_UP) {
+			std::cout << "UP" << std::endl;
 			bool reset = true;
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 
 			cameraPosition.y = cameraPosition.y + 0.5;
-			loadMatOBJ();
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
 			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
@@ -169,8 +167,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 
 			cameraPosition.z = cameraPosition.z - 0.5;
-			loadMatOBJ();
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
 			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
@@ -182,8 +179,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 
 			cameraPosition.z = cameraPosition.z + 0.5;
-			loadMatOBJ();
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+	
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
 			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
@@ -200,7 +196,6 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 			cameraPosition = cameraPosition * cameraRotation;
 			
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
 			std::cout << glm::to_string(cameraPosition);
 
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
@@ -219,7 +214,6 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 
 			cameraPosition = cameraPosition * cameraRotation2;
 			
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
 			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 		}
@@ -232,8 +226,6 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 		}
 		else if (event.key.keysym.sym == SDLK_r){
 			std::cout << "r" << std::endl;
-			
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
 			
 			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 		}
@@ -273,11 +265,11 @@ int main(int argc, char* argv[]) {
 	glm::vec3 to(4.0, 1.0, 9.8);
 	Colour BLACK = Colour(0, 0, 0);
 
-	std::cout << "hello.   make a triangle with 'u'.   make a 3 dimensional filled triangle with 'f'.    " << std::endl << std::endl << "make two boxes in a room with 'r'.   use 'c' to clear the window.   " << std::endl << std::endl;
+	//std::cout << "hello.   make a triangle with 'u'.   make a 3 dimensional filled triangle with 'f'.    " << std::endl << std::endl << "make two boxes in a room with 'r'.   use 'c' to clear the window.   " << std::endl << std::endl;
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
 		if (window.pollForInputEvents(event)) handleEvent(event, window);
-		draw(window);
+		//draw(window);
 		//Need to render the frame at the end, or nothing actually gets shown on the screen !
 		window.renderFrame();
 	}

@@ -57,7 +57,7 @@ std::vector<glm::vec3> interpolateThreeElementValues(glm::vec3 from, glm::vec3 t
 	for (int i = 0; i < numberOfValues; i++) {
 		for (int j = 0; j < 3; j++) {
 			total1 = to[0 + j] - from[0 + j];
-			spacing1 = total1 / (numberOfValues - 1);
+			spacing1 = total1 / (numberOfValues-1);
 			vec[0 + j] = from[0 + j] + spacing1 * i;
 
 		}
@@ -98,24 +98,27 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 			xy.y = fromY + (yStepSize * i);
 		}
 
-		xy.depth = zInterpolation[i];
-		//std::cout << "z depth in drawLine func" << zInterpolation[i] << std::endl;
+		//normalising to be between 0 and 1
+		xy.depth = (zInterpolation[i]+1)/2;
+		//std::cout << "z depth in drawLine func: " << 1/xy.depth << " i is: " << i << std::endl;
 
 		//if x or y is greater than the window width or height dont execute the code
 		if (!((xy.x >= WIDTH) || (xy.x <= 0) || (xy.y >= HEIGHT) || (xy.y <= 0))) {
-			if ((zBuffer[int(xy.x)][int(xy.y)] != 0) && (zBuffer[int(xy.x)][int(xy.y)] > (1 / xy.depth)) && (reset == false))
+			if ((zBuffer[int(xy.x)][int(xy.y)] < (1 / xy.depth)) && (reset == false))
 			{
 				zBuffer[int(xy.x)][int(xy.y)] = 1 / xy.depth;
 
 				window.setPixelColour(xy.x, xy.y, COLOUR);
+				
 			}
 			else if ((zBuffer[int(xy.x)][int(xy.y)] == 0) && (reset == false)) {
 				zBuffer[int(xy.x)][int(xy.y)] = 1 / xy.depth;
 				window.setPixelColour(xy.x, xy.y, COLOUR);
 			}
-			else if ((zBuffer[int(xy.x)][int(xy.y)] < (1 / xy.depth)) && (reset == false)) {
+			else if ((zBuffer[int(xy.x)][int(xy.y)] > (1 / xy.depth)) && (reset == false)) {
 				//do nothing
 			}
+			//RESET BUFFER AND SET ALL PIXELS TO BLACK
 			else if (reset == true) {
 				uint32_t BLACK = (255 << 24) + (0 << 16) + (0 << 8) + 0;
 				window.setPixelColour(xy.x, xy.y, BLACK);
@@ -123,6 +126,7 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 
 			}
 		}
+		//std::cout << zBuffer[int(xy.x)][int(xy.y)];
 	}
 }
 
@@ -286,11 +290,14 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	//FILL BOT TRIANGLE
 	for (size_t i = 0; i < changeInYBot; i++) {
 
-		CanvasPoint LineStart(botLeftXArray[i], (middlePoint.y) + i, botLeftZArray[i]);
-		CanvasPoint LineEnd(botRightXArray[i], (middlePoint.y) + i, botRightZArray[i]);	
+		CanvasPoint LineStart(round(botLeftXArray[i]), round((middlePoint.y) + i), botLeftZArray[i]);
+		CanvasPoint LineEnd(round(botRightXArray[i]), round((middlePoint.y) + i), botRightZArray[i]);	
 		drawLine(window, LineStart, LineEnd, colour, reset);
 		
 	}
+	//_sleep(50);
+	window.renderFrame();
+
 }
 int counter = 0;
 
