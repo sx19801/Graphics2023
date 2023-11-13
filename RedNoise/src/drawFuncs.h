@@ -17,8 +17,12 @@
 #include <map>
 #include <algorithm>
 
-#define HEIGHT 720
-#define WIDTH 960
+#define WIDTH 320
+#define HEIGHT 240
+
+//#define WIDTH 960
+//#define HEIGHT 720
+
 //initalising zbuffer with height and width of screen
 float zBuffer[WIDTH][HEIGHT] = {};
 
@@ -98,17 +102,18 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 		//std::cout << "z depth in drawLine func" << zInterpolation[i] << std::endl;
 
 		//if x or y is greater than the window width or height dont execute the code
-		if ((xy.x < WIDTH) || (xy.x > 0) || (xy.y < HEIGHT) || (xy.y > 0)) {
-			if ((zBuffer[int(xy.x)][int(xy.y)] != 0) && (zBuffer[int(xy.x)][int(xy.y)] > 1 / xy.depth) && (reset == false))
+		if (!((xy.x >= WIDTH) || (xy.x <= 0) || (xy.y >= HEIGHT) || (xy.y <= 0))) {
+			if ((zBuffer[int(xy.x)][int(xy.y)] != 0) && (zBuffer[int(xy.x)][int(xy.y)] > (1 / xy.depth)) && (reset == false))
 			{
 				zBuffer[int(xy.x)][int(xy.y)] = 1 / xy.depth;
+
 				window.setPixelColour(xy.x, xy.y, COLOUR);
 			}
 			else if ((zBuffer[int(xy.x)][int(xy.y)] == 0) && (reset == false)) {
 				zBuffer[int(xy.x)][int(xy.y)] = 1 / xy.depth;
 				window.setPixelColour(xy.x, xy.y, COLOUR);
 			}
-			else if ((zBuffer[int(xy.x)][int(xy.y)] < 1 / xy.depth) && (reset == false)) {
+			else if ((zBuffer[int(xy.x)][int(xy.y)] < (1 / xy.depth)) && (reset == false)) {
 				//do nothing
 			}
 			else if (reset == true) {
@@ -118,7 +123,6 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 
 			}
 		}
-		//window.setPixelColour(xy.x, xy.y, COLOUR);
 	}
 }
 
@@ -275,41 +279,23 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 
 		CanvasPoint LineStart(round(topLeftXArray[i]), round((topPoint.y) + i), topLeftZArray[i]);
 		CanvasPoint LineEnd(round(topRightXArray[i]), round((topPoint.y) + i), topRightZArray[i]);
-
-		/*if (topLeftXArray[i] < 0) {
-			LineStart.x = 1;
-		}
-		if (topRightXArray[i] > WIDTH) {
-			LineEnd.x = WIDTH;
-		}*/ 
-		//&& (topPoint.y + i > 0) && (topPoint.y + i < HEIGHT)
-		//if ((topLeftXArray[i] > 0) && (topLeftXArray[i] < WIDTH) && (topRightXArray[i] > 0) && (topRightXArray[i] < WIDTH)) {
-			drawLine(window, LineStart, LineEnd, colour, reset);
-		//}
+		drawLine(window, LineStart, LineEnd, colour, reset);
+		
 	}
 
 	//FILL BOT TRIANGLE
 	for (size_t i = 0; i < changeInYBot; i++) {
 
 		CanvasPoint LineStart(botLeftXArray[i], (middlePoint.y) + i, botLeftZArray[i]);
-		CanvasPoint LineEnd(botRightXArray[i], (middlePoint.y) + i, botRightZArray[i]);
+		CanvasPoint LineEnd(botRightXArray[i], (middlePoint.y) + i, botRightZArray[i]);	
+		drawLine(window, LineStart, LineEnd, colour, reset);
 		
-		/*if (botLeftXArray[i] < 0) {
-			LineStart.x = 1;
-		}
-		if (botRightXArray[i] > WIDTH) {
-			LineEnd.x = WIDTH;
-		}*/
-		//&& (middlePoint.y + i > 0) && (middlePoint.y + i < HEIGHT)
-		//if ((botLeftXArray[i] > 0) && (botLeftXArray[i] < WIDTH) && (botRightXArray[i] > 0) && (botRightXArray[i] < WIDTH)) {
-			drawLine(window, LineStart, LineEnd, colour, reset);
-		//}
 	}
 }
 int counter = 0;
 
 void draw(DrawingWindow& window) {
-	//window.clearPixels();
+
 	size_t i = 0;
 	glm::vec3 topLeft(255, 0, 0);        // red 
 	glm::vec3 topRight(0, 0, 255);       // blue 
@@ -338,19 +324,6 @@ void draw(DrawingWindow& window) {
 	std::vector<glm::vec3> leftColumn = interpolateThreeElementValues(topLeft, bottomLeft, window.height);
 	std::vector<glm::vec3> rightColumn = interpolateThreeElementValues(topRight, bottomRight, window.height);
 
-	//for (size_t y = 0; y < window.height; y++) {
-	//	for (size_t x = 0; x < window.width; x++) {
-	//		std::vector<glm::vec3> rowRGB = interpolateThreeElementValues(leftColumn[y], rightColumn[y], window.width);
-	//		glm::vec3 currentRGB = rowRGB[x];
-	//		float red = currentRGB[0];
-	//		float green = currentRGB[1];
-	//		float blue = currentRGB[2];
-	//		uint32_t colour = (0 << 24) + (int(0) << 16) + (int(0) << 8) + int(0);
-	//		/*uint32_t colour = (255 << 24) + (int(red) << 16) + (int(green) << 8) + int(blue);*/
-
-	//		window.setPixelColour(x, y, colour);
-	//	}
-	//}
 }
 
 

@@ -44,7 +44,6 @@ void loadMatOBJ() {
 			ss >> a;
 			name = a;
 			colourMap[a] = {};
-			//std::cout << a << " << a" << std::endl;
 
 		}
 		else if (identifier == "Kd") {
@@ -58,10 +57,6 @@ void loadMatOBJ() {
 		}
 
 	}
-
-	//for (auto const& pair : colourMap) {																//print out all elements in hash map
-		//std::cout << "{" << pair.first << ": " << glm::to_string(pair.second) << "}\n";
-	//}
 }
 
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {

@@ -14,12 +14,16 @@
 #include"drawFuncs.h"
 
 
-#define WIDTH 960
-#define HEIGHT 720
+#define WIDTH 320
+#define HEIGHT 240
+
+//#define WIDTH 960
+//#define HEIGHT 720
+
 
 glm::vec3 cameraPosition = { 0.0, 0.0, 4.0 };
 float normalisingScalingFactor = 0.35;
-float secScalingFactorY = 180;
+float secScalingFactorY = 60;
 float secScalingFactorX = 360;
 float focalLength = 2.0;
 CanvasPoint resetFrom(0, 0, 10);
@@ -27,10 +31,7 @@ CanvasPoint resetTo(WIDTH - 1, 0, 10);
 Colour COLOUR = Colour(rand() % 255, rand() % 255, rand() % 255);
 Colour WHITE = Colour(255, 255, 255);
 Colour BLACK(0, 0, 0);
-	
-
-//#define WIDTH 320
-//#define HEIGHT 240
+glm::mat3 cameraRotation;
 
 CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 vertexPosition, float focalLength) {
 	//function to calculate 2D canvaspoint on image plane
@@ -68,25 +69,17 @@ void intersectionCalcsAndDrawing(glm::vec3 cameraPosition, std::vector<ModelTria
 			//+1 since some of the z values are negative so make all positive (instead of from -1 to 1 the values are now 0 to 2)
 			imagePlanePointScaled.depth = vertexPosition.z + 1;
 
-			//I THINK THIS IS CORRECT FOR SETTING THE DEPTH \/    \/    \/    \/     \/    \/   
-			//zDepth[int(imagePlanePointScaled.x)][int(imagePlanePointScaled.y)] = (1/imagePlanePoint.depth);
-
 			triangle2D.vertices[j] = imagePlanePointScaled;
 
 			imagePlanePoints.push_back(imagePlanePointScaled);
-			//_sleep(80);
-			//std::cout << "image plane points: " << imagePlanePointScaled.x << " " << imagePlanePointScaled.y << std::endl;
-			//draw(window, imagePlanePointScaled.x, imagePlanePointScaled.y);
-			//drawStrokedTriangle(window, );
-			//std::cout << "this is the image plane point x: " << imagePlanePoint.x << " this the y: " << imagePlanePoint.y << std::endl;
-			//std::cout << "just checking this shit works" << i << " <- thats i " << j << " <- and thats j" << std::endl;
 		}
 
 		triangles2D.push_back(triangle2D);
 		//drawStrokedTriangle(window, triangles2D[i], WHITE);
 		drawFilledTriangle(window, triangles2D[i], triangles3D[i].colour);
-		window.renderFrame();
+		
 	}
+	window.renderFrame();
 }
 
 void resetZDepthBuffer(CanvasPoint resetFrom, CanvasPoint resetTo, Colour BLACK, bool reset, DrawingWindow& window) {
@@ -110,37 +103,41 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 	CanvasPoint imagePlanePointScaled;
 	CanvasTriangle triangle2D;
 	std::vector<CanvasPoint> imagePlanePoints;
+	cameraRotation;
+	float degrees = 15;
+	float theta = degrees * (3.14159 / 180);
+
 
 	if (event.type == SDL_KEYDOWN) {
-		if (event.key.keysym.sym == SDLK_LEFT) { 
+		if (event.key.keysym.sym == SDLK_LEFT) {
 			std::cout << "LEFT" << std::endl;
 			bool reset = true;
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 
 			cameraPosition.x = cameraPosition.x + 0.5;
-			loadMatOBJ();
+			
 			triangles3D = loadGeoOBJ(normalisingScalingFactor);
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
-			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, 160, window);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
 			window.renderFrame();
 		}
-		else if (event.key.keysym.sym == SDLK_RIGHT) { 
+		else if (event.key.keysym.sym == SDLK_RIGHT) {
 			std::cout << "RIGHT" << std::endl;
 
 			bool reset = true;
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 
 			cameraPosition.x = cameraPosition.x - 0.5;
-			loadMatOBJ();
+			
 			triangles3D = loadGeoOBJ(normalisingScalingFactor);
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
-			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, 160, window);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
 			window.renderFrame();
 		}
-		else if (event.key.keysym.sym == SDLK_UP) { 
-			std::cout << "UP" << std::endl; 
+		else if (event.key.keysym.sym == SDLK_UP) {
+			std::cout << "UP" << std::endl;
 
 			bool reset = true;
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
@@ -149,12 +146,12 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 			loadMatOBJ();
 			triangles3D = loadGeoOBJ(normalisingScalingFactor);
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
-			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, 160, window);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
 			window.renderFrame();
 		}
-		else if (event.key.keysym.sym == SDLK_DOWN) { 
-			std::cout << "DOWN" << std::endl; 
+		else if (event.key.keysym.sym == SDLK_DOWN) {
+			std::cout << "DOWN" << std::endl;
 			bool reset = true;
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
 
@@ -162,16 +159,91 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 			loadMatOBJ();
 			triangles3D = loadGeoOBJ(normalisingScalingFactor);
 			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
-			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, 160, window);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
 
 			window.renderFrame();
 		}
-		else if (event.key.keysym.sym == SDLK_c) {
-			std::cout << "c" << std::endl;
-			
+		else if (event.key.keysym.sym == SDLK_z) {
+			std::cout << "ZOOM IN" << std::endl;
 			bool reset = true;
 			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
+
+			cameraPosition.z = cameraPosition.z - 0.5;
+			loadMatOBJ();
+			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
+
+			window.renderFrame();
+		}
+		else if (event.key.keysym.sym == SDLK_x) {
+			std::cout << "ZOOM OUT" << std::endl;
+			bool reset = true;
+			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
+
+			cameraPosition.z = cameraPosition.z + 0.5;
+			loadMatOBJ();
+			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
+
+			window.renderFrame();
+		}
+		else if (event.key.keysym.sym == SDLK_q) {
+			cameraRotation = glm::mat3(
+				1.0, 0.0, 0.0,
+				0.0, cos(theta), sin(theta),
+				0.0, -sin(theta), cos(theta)
+			);
+
+			bool reset = true;
+			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
+			cameraPosition = cameraPosition * cameraRotation;
 			
+			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+			std::cout << glm::to_string(cameraPosition);
+
+			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
+			window.renderFrame();
+		}
+		else if (event.key.keysym.sym == SDLK_e) {
+			glm::mat3 cameraRotation2 = glm::mat3(
+				cos(theta), 0.0, -sin(theta),
+				0.0, 1.0, 0.0,
+				sin(theta), 0.0, cos(theta)
+			);
+
+			bool reset = true;
+			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
+
+			cameraPosition = cameraPosition * cameraRotation2;
+			
+			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+			//getCanvasIntersectionPoint(cameraPosition, vertexPosition, focalLength);
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
+		}
+		else if (event.key.keysym.sym == SDLK_l) {
+			loadGeoOBJ(normalisingScalingFactor);
+		}
+		else if (event.key.keysym.sym == SDLK_t) {
+		}
+		else if (event.key.keysym.sym == SDLK_m) {
+		}
+		else if (event.key.keysym.sym == SDLK_r){
+			std::cout << "r" << std::endl;
+			
+			triangles3D = loadGeoOBJ(normalisingScalingFactor);
+			
+			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, secScalingFactorY, window);
+		}
+		else if (event.key.keysym.sym == SDLK_c) {
+			std::cout << "c" << std::endl;
+
+			bool reset = true;
+			resetZDepthBuffer(resetFrom, resetTo, BLACK, reset, window);
+			cameraPosition = {0.0, 0.0, 4.0};
+
 		}
 		else if (event.key.keysym.sym == SDLK_u) {
 			std::cout << "u" << std::endl;
@@ -181,23 +253,8 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 			std::cout << "f" << std::endl;
 			drawFilledTriangle(window, triangle, COLOUR);
 		}
-		else if (event.key.keysym.sym == SDLK_t) {
-
-		}
-		else if (event.key.keysym.sym == SDLK_l) {
-			loadGeoOBJ(normalisingScalingFactor);
-		}
-		else if (event.key.keysym.sym == SDLK_m) {
-			loadMatOBJ();
-		}
-		else if (event.key.keysym.sym == SDLK_r){
-			std::cout << "r" << std::endl;
-			loadMatOBJ();
-			triangles3D = loadGeoOBJ(normalisingScalingFactor);
-			
-			intersectionCalcsAndDrawing(cameraPosition, triangles3D, 2.0, 160, window);
-		}
-	}
+		std::cout << glm::to_string(cameraPosition);
+}
 	else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		window.savePPM("output.ppm");
 		window.saveBMP("output.bmp");
@@ -207,7 +264,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 int main(int argc, char* argv[]) {
 	//Ensuring randomness
 	srand((unsigned int)time(NULL));
-
+	loadMatOBJ();
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
 	std::vector<float> result;
