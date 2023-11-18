@@ -35,7 +35,7 @@ add_executable(RedNoise
         libs/sdw/TextureMap.cpp
         libs/sdw/TexturePoint.cpp
         libs/sdw/Utils.cpp
-        src/RedNoise.cpp "src/objFuncs.h" "src/drawFuncs.h"  "src/drawFuncs.cpp")
+             "src/camera.cpp" "src/camera.h" "src/objFuncs.cpp" "src/objFuncs.h" "src/RedNoise.cpp" "src/Triangle.cpp" "src/Triangle.h")
 
 if (MSVC)
     target_compile_options(RedNoise
