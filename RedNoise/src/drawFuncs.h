@@ -73,10 +73,17 @@ void triangleTextureMap() {
 
 void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour colour, bool reset) {
 	std::vector<float> zInterpolation;
+	std::vector<float> xInterpolation;
+	std::vector<float> yInterpolation;
+
+
 	float toX = round(to.x);
 	float fromX = round(from.x);
 	float toY = round(to.y);
 	float fromY = round(from.y);
+	float toDepth = to.depth;
+	float fromDepth = from.depth;
+
 	int xDiff = toX - fromX;
 	int yDiff = toY - fromY;
 	float numberOfSteps = std::max(std::abs(xDiff), std::abs(yDiff));
@@ -84,7 +91,10 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 	float yStepSize = yDiff / numberOfSteps;
 	uint32_t COLOUR = (0 << 24) + (int(colour.red) << 16) + (int(colour.green) << 8) + int(colour.blue);
 	
+
 	zInterpolation = interpolateSingleFloats(from.depth, to.depth, numberOfSteps+1);
+	xInterpolation = interpolateSingleFloats(from.x, to.x, numberOfSteps+1);
+	yInterpolation = interpolateSingleFloats(from.y, to.y, numberOfSteps + 1);
 	
 	for (int i = 0; i <= numberOfSteps; i++) {
 		CanvasPoint xy;
@@ -92,30 +102,41 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 		if (numberOfSteps == 0) {
 			xy.x = fromX;
 			xy.y = fromY;
+			//xy.depth = from.depth;
 		}
 		else {
 			xy.x = fromX + (xStepSize * i);
 			xy.y = fromY + (yStepSize * i);
+		//	xy.depth = from.depth + (yStepSize * i);
 		}
 
 		//normalising to be between 0 and 1
-		xy.depth = (zInterpolation[i]+1)/2;
-		//std::cout << "z depth in drawLine func: " << 1/xy.depth << " i is: " << i << std::endl;
-
+		//xy.depth = (zInterpolation[i]+1)/2;
+		xy.depth = zInterpolation[i];
+		
+	/*	xy.x = xInterpolation[i];
+		xy.y = yInterpolation[i];*/
+		//std::cout << "y in xy from yinterpolation[i]: " << xy.y << std::endl;
+		
+		//std::cout << "z coord before buffer: " << xy.depth << std::endl;
+		
 		//if x or y is greater than the window width or height dont execute the code
-		if (!((xy.x >= WIDTH) || (xy.x <= 0) || (xy.y >= HEIGHT) || (xy.y <= 0))) {
-			if ((zBuffer[int(xy.x)][int(xy.y)] < (1 / xy.depth)) && (reset == false))
+		
+		
+		
+		if (!((xy.x >= WIDTH) || (xy.x < 1) || (xy.y >= HEIGHT) || (xy.y < 1))) {
+			if ((zBuffer[int(xy.x)][int(xy.y)] < (xy.depth)) && (reset == false))
 			{
-				zBuffer[int(xy.x)][int(xy.y)] = 1 / xy.depth;
+				zBuffer[int(xy.x)][int(xy.y)] = xy.depth;
 
 				window.setPixelColour(xy.x, xy.y, COLOUR);
 				
 			}
 			else if ((zBuffer[int(xy.x)][int(xy.y)] == 0) && (reset == false)) {
-				zBuffer[int(xy.x)][int(xy.y)] = 1 / xy.depth;
+				zBuffer[int(xy.x)][int(xy.y)] = xy.depth;
 				window.setPixelColour(xy.x, xy.y, COLOUR);
 			}
-			else if ((zBuffer[int(xy.x)][int(xy.y)] > (1 / xy.depth)) && (reset == false)) {
+			else if ((zBuffer[int(xy.x)][int(xy.y)] > (xy.depth)) && (reset == false)) {
 				//do nothing
 			}
 			//RESET BUFFER AND SET ALL PIXELS TO BLACK
@@ -126,6 +147,9 @@ void drawLine(DrawingWindow& window, CanvasPoint from, CanvasPoint to, Colour co
 
 			}
 		}
+		/*if (!((xy.x >= WIDTH) || (xy.x < 1) || (xy.y >= HEIGHT) || (xy.y < 1))) {
+			window.setPixelColour(xy.x, xy.y, COLOUR);
+		}*/
 		//std::cout << zBuffer[int(xy.x)][int(xy.y)];
 	}
 }
@@ -224,19 +248,18 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 		}
 	};
 
+	//std::cout << "before interpolations in drawfilledtriangle z: " << topPoint.depth << std::endl;
+
 	//Step 1.5: find gradient from top to bottom points to find x coordinate
 	float changeInX = bottomPoint.x - topPoint.x;
 	float changeInY = bottomPoint.y - topPoint.y;
 	float changeInZ = bottomPoint.depth - topPoint.depth;
-	float gradient = (changeInY) / (changeInX);
 
-	//prevents bugging out if grad = 0
-	if (gradient == 0) {
-		return;
-	}
+	//interpolateSingleFloats(topPoint.x, bottomPoint.x, changeInY);
 
 	//trying ratios instead
 	float ratio = (bottomPoint.y - middlePoint.y) / changeInY;
+	//float ratioZ = (bottomPoint.depth - middlePoint.depth) / changeInY;
 	float newMidPointX = bottomPoint.x - changeInX * ratio;
 	float newMidPointZ = bottomPoint.depth - changeInZ * ratio;
 
@@ -263,6 +286,7 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 	int changeInYTop = middlePoint.y - topPoint.y;
 	int changeInYBot = bottomPoint.y - middlePoint.y;
 
+
 	//interpolations for the top and bot triangle sides
 	std::vector<float> topLeftXArray = interpolateSingleFloats(topPoint.x, leftMidPoint, changeInYTop);
 	std::vector<float> topRightXArray = interpolateSingleFloats(topPoint.x, rightMidPoint, changeInYTop);
@@ -283,6 +307,9 @@ void drawFilledTriangle(DrawingWindow& window, CanvasTriangle triangle, Colour c
 
 		CanvasPoint LineStart(round(topLeftXArray[i]), round((topPoint.y) + i), topLeftZArray[i]);
 		CanvasPoint LineEnd(round(topRightXArray[i]), round((topPoint.y) + i), topRightZArray[i]);
+		//std::cout << "top left z array : " << topLeftZArray[i] << std::endl;
+		//std::cout << "top right z array : " << topRightZArray[i] << std::endl;
+
 		drawLine(window, LineStart, LineEnd, colour, reset);
 		
 	}
