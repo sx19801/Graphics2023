@@ -231,7 +231,7 @@ void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& w
 	}
 }
 
-CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 vertexPosition, float focalLength) {
+CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::mat3 cameraOrientation, glm::vec3 vertexPosition, float focalLength) {
 	CanvasPoint intersectPoint;
 	//std::cout << "vertex position" << glm::to_string(vertexPosition) << std::endl;#
 
@@ -239,13 +239,16 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 verte
 
 
 	glm::vec3 dist = cameraPosition - vertexPosition;
+	glm::vec3 adjustedVector = dist * cameraOrientation;
 
-	intersectPoint.x = (focalLength * ((-dist.x) / dist.z));
-	intersectPoint.y = (focalLength * ((dist.y) / dist.z));
 
-	float zDistance = sqrt((pow(vertexPosition.x - cameraPosition.x, 2)+pow(vertexPosition.y - cameraPosition.y,2)+pow(vertexPosition.z - cameraPosition.z,2)));
+	intersectPoint.x = (focalLength * ((adjustedVector.x) / adjustedVector.z));
+	intersectPoint.y = (focalLength * ((adjustedVector.y) / adjustedVector.z));
 
-	intersectPoint.depth = cameraPosition.z - vertexPosition.z;
+	float zDistance = sqrt((pow(cameraPosition.x- vertexPosition.x, 2)+pow(cameraPosition.y - vertexPosition.y,2)+pow(cameraPosition.z - vertexPosition.z,2)));
+
+	intersectPoint.depth = dist.z;
+	//intersectPoint.depth = zDistance;
 
 	//std::cout << " intersection point" << intersectPoint << std::endl;
 

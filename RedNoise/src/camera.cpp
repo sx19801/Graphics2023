@@ -27,26 +27,52 @@ Camera Camera::translate(Camera& camera, int& mode) {
 }
 
 Camera Camera::rotate(Camera& camera, int& mode, float theta) {
-
 	switch (mode)
 	{
 	case 1:
-		camera.cameraOrientation = {
-			1, 0, 0,
-			0, cos(theta), sin(theta),
-			0, -sin(theta), cos(theta),
-		};
-		camera.cameraPosition = camera.cameraOrientation * camera.cameraPosition;
+		camera.cameraOrientation = camera.rotationX * camera.cameraOrientation;
 		break;
 	case 2:
-		camera.cameraOrientation = {
-			cos(theta), 0, -sin(theta),
-			0, 1, 0,
-			sin(theta), 0, cos(theta),
-		};
-		camera.cameraPosition = camera.cameraOrientation * camera.cameraPosition;
+		camera.cameraOrientation = camera.rotationY * camera.cameraOrientation;
 		break;
-	
+	case 3:
+		camera.cameraPosition = camera.rotationX * camera.cameraPosition;
+		break;
+	case 4:
+		camera.cameraPosition = camera.rotationY * camera.cameraPosition;
+		break;
+
 	}
 	return camera;
+}
+
+Camera Camera::orbit(Camera& camera, float theta) {
+	camera.cameraPosition = camera.rotationY * camera.cameraPosition;
+	//camera.lookAt(camera, camera.lookAtPoint);
+	return camera;
+}
+
+void Camera::lookAt(Camera& camera, glm::vec3 lookAtPoint) {
+	
+	glm::vec3 right;
+	glm::vec3 up;
+	glm::vec3 vertical = { 0.0, 1.0, 0.0 };
+
+	glm::vec3 forward = lookAtPoint - camera.cameraPosition;
+
+	//need to normalise forward 
+	float len = sqrt((forward.x * forward.x) + (forward.y * forward.y) + (forward.z * forward.z));
+	forward.x /= len;
+	forward.y /= len;
+	forward.z /= len;
+
+	right = glm::cross(vertical, forward);
+	up = glm::cross(forward, right);
+
+	 camera.cameraOrientation = {
+		right,
+		-up,
+		forward,
+	};
+
 }

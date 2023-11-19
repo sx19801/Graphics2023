@@ -19,7 +19,7 @@ void drawStrokedTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow &
 
 void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow &window);
 
-CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 vertexPosition, float focalLength);
+CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::mat3 cameraOrientation, glm::vec3 vertexPosition, float focalLength);
 
 std::vector<CanvasPoint> orderByIncrY(CanvasTriangle triangle);
 
