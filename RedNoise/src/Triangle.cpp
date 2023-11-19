@@ -4,8 +4,13 @@
 #include <glm/ext.hpp>
 
 
-#define WIDTH 960
-#define HEIGHT 720
+#define WIDTH 480
+#define HEIGHT 360
+
+//#define WIDTH 960
+//#define HEIGHT 720
+
+
 float zBuffer[WIDTH][HEIGHT] = {}; //actually -1 on both the row and column since starts at 0
 
 std::vector<float> interpolateSingleFloats(float from, float to, int numberOfValues) {
@@ -67,16 +72,13 @@ std::vector<CanvasPoint> orderByIncrY(CanvasTriangle triangle) {
 
 
 bool zDepthCheck(float x, float y, float z) {
-
-
-
 	if (zBuffer[int(x)][int(y)] == 0) {
-		zBuffer[int(x)][int(y)] = 1 / z;
+		zBuffer[int(x)][int(y)] = 1/z;
 		return true;
 	}
 	else {
-		if (zBuffer[int(x)][int(y)] < 1 / z) {
-			zBuffer[int(x)][int(y)] = 1 / z;
+		if (zBuffer[int(x)][int(y)] < 1/z) {
+			zBuffer[int(x)][int(y)] = 1/z;
 			return true;
 		}
 		else {
@@ -86,7 +88,20 @@ bool zDepthCheck(float x, float y, float z) {
 
 }
 
+void resetDepthBuffer(DrawingWindow& window) {
+	window.clearPixels();
+	for (size_t i = 0; i < WIDTH; i++) {
+		for (size_t j = 0; j < HEIGHT; j++) {
+			zBuffer[i][j] = 0;
+		}
+	}
+}
 
+bool compareOnScreen(float u, float v) { 
+	if ((u < WIDTH) && (v < HEIGHT) && (u >= 0) && (v >= 0)) {
+		return true;
+	}
+}
 void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& window) {
 	float toX = (to.x);
 	float fromX = (from.x);
@@ -113,7 +128,7 @@ void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& wi
 	float zStepSize = changeInZ / numberOfSteps;
 
 	CanvasPoint xy;
-
+	
 	if (numberOfSteps == 0) {
 		xy.x = fromX;
 		xy.y = fromY;
@@ -121,23 +136,34 @@ void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& wi
 	}
 	else {
 		for (size_t i = 0; i <= numberOfSteps; i++) {
+			
+			
 			xy.x = from.x + (xStepSize * i);
 			xy.y = from.y + (yStepSize * i);
 			xy.depth = from.depth + (zStepSize * i);
 
-			if (zDepthCheck(round(xy.x), round(xy.y), xy.depth) == true) {
-				window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
-				//window.renderFrame();
-			};
+			
+			//std::cout << "depth per step : " << xy.depth << " at i : "<< i <<  std::endl;
+			
+			if (compareOnScreen(xy.x, xy.y) == true){
+				if ((zDepthCheck(round(xy.x), round(xy.y), xy.depth) == true)) {
+					window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
+					//window.renderFrame();
+				}
+			}
 
 
 			//window.setPixelColour(xy.x, xy.y, colourUint32);
 
 		}
-		if (zDepthCheck(round(xy.x), round(xy.y), xy.depth) == true) {
-			window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
-			//window.renderFrame();
-		};
+
+		//if (compareOnScreen(xy.x,xy.y)){
+		//	if (zDepthCheck(round(xy.x), round(xy.y), xy.depth) == true) {
+		//		window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
+		//		//window.renderFrame();
+		//	}
+		//}
+
 	}
 }
 
@@ -217,7 +243,9 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 verte
 	intersectPoint.x = (focalLength * ((-dist.x) / dist.z));
 	intersectPoint.y = (focalLength * ((dist.y) / dist.z));
 
-	intersectPoint.depth = dist.z;
+	float zDistance = sqrt((pow(vertexPosition.x - cameraPosition.x, 2)+pow(vertexPosition.y - cameraPosition.y,2)+pow(vertexPosition.z - cameraPosition.z,2)));
+
+	intersectPoint.depth = cameraPosition.z - vertexPosition.z;
 
 	//std::cout << " intersection point" << intersectPoint << std::endl;
 

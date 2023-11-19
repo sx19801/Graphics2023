@@ -11,7 +11,7 @@
 
 std::vector<float> interpolateSingleFloats(float from, float to, int numberOfValues);
 
-void draw(DrawingWindow& window);
+void resetDepthBuffer(DrawingWindow& window);
 
 void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow &window);
 

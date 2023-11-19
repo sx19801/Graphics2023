@@ -7,15 +7,40 @@
 #include "camera.h"
 #include "objFuncs.h"
 
-#define WIDTH 960
-#define HEIGHT 720
+#define WIDTH 480
+#define HEIGHT 360
 
-void handleEvent(SDL_Event event, DrawingWindow& window) {
+//#define WIDTH 960
+//#define HEIGHT 720
+
+void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera) {
+	int mode;
+	float theta = 0.1;
 	if (event.type == SDL_KEYDOWN) {
-		if (event.key.keysym.sym == SDLK_LEFT) std::cout << "LEFT" << std::endl;
-		else if (event.key.keysym.sym == SDLK_RIGHT) std::cout << "RIGHT" << std::endl;
-		else if (event.key.keysym.sym == SDLK_UP) std::cout << "UP" << std::endl;
-		else if (event.key.keysym.sym == SDLK_DOWN) std::cout << "DOWN" << std::endl;
+		if (event.key.keysym.sym == SDLK_LEFT) { 
+			mode = 1;
+			std::cout << "LEFT" << std::endl; 
+			resetDepthBuffer(window);
+			camera.translate(camera, mode);
+		}
+		else if (event.key.keysym.sym == SDLK_RIGHT) {
+			std::cout << "RIGHT" << std::endl;
+			mode = 2;
+			resetDepthBuffer(window);
+			camera.translate(camera, mode);
+		}
+		else if (event.key.keysym.sym == SDLK_UP) { 
+			std::cout << "UP" << std::endl; 
+			mode = 3;
+			resetDepthBuffer(window);
+			camera.translate(camera, mode);
+		}
+		else if (event.key.keysym.sym == SDLK_DOWN) {
+			std::cout << "DOWN" << std::endl;
+			mode = 4;
+			resetDepthBuffer(window);
+			camera.translate(camera, mode);
+		}
 		else if (event.key.keysym.sym == SDLK_u) {
 			std::cout << "U" << std::endl;
 			CanvasTriangle triangle(CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height));
@@ -25,7 +50,13 @@ void handleEvent(SDL_Event event, DrawingWindow& window) {
 			//CanvasTriangle triangle(CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height));
 			//std::cout << triangle << '\n';
 			//drawFilledTriangle(triangle, Colour(rand() % 255, rand() % 255, rand() % 255), window);
-		};
+		}
+		else if (event.key.keysym.sym == SDLK_x){
+			std::cout << "rotate in x" << std::endl;
+			mode = 1;
+			resetDepthBuffer(window);
+			camera.rotate(camera, mode, theta);
+		}
 	}
 	else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		window.savePPM("output.ppm");
@@ -59,7 +90,7 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle> triangles, Camera& c
 		//std::cout << "canvas point triangle " << canvasPointTriangle << std::endl;
 		//drawStrokedTriangle(canvasPointTriangle, triangles[i].colour, window);
 		drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window);
-		//	window.renderFrame();
+		//window.renderFrame();
 	}
 	//draw is setting pixel colours
 	// calling canvasintersectionpoint for each vertex of each triangle
@@ -78,7 +109,7 @@ int main(int argc, char* argv[]) {
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
 		//draw(window, triangles, camera);
-		if (window.pollForInputEvents(event)) handleEvent(event, window);
+		if (window.pollForInputEvents(event)) handleEvent(event, window, camera);
 		draw(window, triangles, camera);
 		// Need to render the frame at the end, or nothing actually gets shown on the screen !
 		window.renderFrame();

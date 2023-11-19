@@ -9,8 +9,10 @@ public:
 	glm::mat3 cameraOrientation;
 	float focalLength = 2.0;
 
-	
-};
+	Camera translate(Camera& camera, int& mode);
 
+	Camera rotate(Camera& camera, int& mode, float theta);
+
+};
 
 #endif // !CAMERA_H
