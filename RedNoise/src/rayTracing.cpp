@@ -12,7 +12,7 @@ void getClosestValidIntersection(std::vector<ModelTriangle> triangles, glm::vec3
 		ModelTriangle triangle = triangles[i];
 
 
-		//std::cout << glm::to_string(triangle.vertices[0]) << " " << glm::to_string(triangle.vertices[1]) << " " << glm::to_string(triangle.vertices[2]) << " " << std::endl;
+		std::cout << glm::to_string(triangle.vertices[0]) << " " << glm::to_string(triangle.vertices[1]) << " " << glm::to_string(triangle.vertices[2]) << " " << std::endl;
 
 		glm::vec3 e0 = triangle.vertices[1] - triangle.vertices[0];
 		glm::vec3 e1 = triangle.vertices[2] - triangle.vertices[0];
@@ -38,22 +38,32 @@ void getClosestValidIntersection(std::vector<ModelTriangle> triangles, glm::vec3
 				glm::vec3 normalisedDirection = normalise(rayDirection);
 				//SMALLEST T VALUE CHECK \/
 				if (t < closestIntersectedPointT) {
-					std::cout << triangle.colour << std::endl;
+				//	std::cout << triangle.colour << std::endl;
 					//std::cout << "closestintersectionpointT :" << closestIntersectedPointT << std::endl;
-					closestIntersection.intersectionPoint = getIntersectionPoint(cameraPosition, normalisedDirection, t);
+					closestIntersection.intersectionPoint = getTriangleIntersectionPointT(cameraPosition, normalisedDirection, t);
 					closestIntersectedPointT = t;
-					std::cout << "t :" << t << std::endl;
-					std::cout << closestIntersection.intersectedTriangle.colour << " " << closestIntersection.intersectedTriangle << " " << glm::to_string(closestIntersection.intersectionPoint) << std::endl;
+				//	std::cout << "t :" << t << std::endl;
+				//	std::cout << closestIntersection.intersectedTriangle.colour << " " << closestIntersection.intersectedTriangle << " " << glm::to_string(closestIntersection.intersectionPoint) << std::endl;
+					std::cout << "INTERSECTION POINT ON CLOSEST TRIANGLE:  " << glm::to_string(closestIntersection.intersectionPoint) << std::endl;
 				}
 			}
 
+		}
+		else {
+			
 		}
 	}
 
 	
 }
 
-glm::vec3 getIntersectionPoint(glm::vec3 cameraPosition, glm::vec3 rayDirection, float t) {
+glm::vec3 getTriangleIntersectionPointUV(float u, float v, ModelTriangle triangle) {
+	glm::vec3 point;
+	
+	return point;
+}
+
+glm::vec3 getTriangleIntersectionPointT(glm::vec3 cameraPosition, glm::vec3 rayDirection, float t) {
 	glm::vec3 intersectionPoint = cameraPosition + rayDirection * t;
 	return intersectionPoint;
 }
