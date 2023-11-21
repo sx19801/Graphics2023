@@ -4,11 +4,11 @@
 #include <glm/ext.hpp>
 
 
-#define WIDTH 480
-#define HEIGHT 360
+//#define WIDTH 480
+//#define HEIGHT 360
+#define WIDTH 960
+#define HEIGHT 720
 
-//#define WIDTH 960
-//#define HEIGHT 720
 
 
 float zBuffer[WIDTH][HEIGHT] = {}; //actually -1 on both the row and column since starts at 0
@@ -59,6 +59,7 @@ std::vector<CanvasPoint> interpolateSinglePoints(CanvasPoint from, CanvasPoint t
 }
 
 bool compareY(CanvasPoint u, CanvasPoint v) { return (u.y < v.y); }
+
 std::vector<CanvasPoint> orderByIncrY(CanvasTriangle triangle) {
 
 	std::vector<CanvasPoint> points = { triangle.v0(), triangle.v1(), triangle.v2() };
@@ -68,8 +69,6 @@ std::vector<CanvasPoint> orderByIncrY(CanvasTriangle triangle) {
 	return points;
 
 }
-
-
 
 bool zDepthCheck(float x, float y, float z) {
 	if (zBuffer[int(x)][int(y)] == 0) {
@@ -102,6 +101,7 @@ bool compareOnScreen(float u, float v) {
 		return true;
 	}
 }
+
 void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& window) {
 	float toX = (to.x);
 	float fromX = (from.x);
@@ -171,10 +171,15 @@ void drawStrokedTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& 
 	drawLine(triangle.v0(), triangle.v1(), colour, window);
 	drawLine(triangle.v1(), triangle.v2(), colour, window);
 	drawLine(triangle.v2(), triangle.v0(), colour, window);
+	std::cout << triangle.v0() << " " << triangle.v1() << " " << triangle.v2() << std::endl;
 }
 
 void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& window) {
 	std::vector<CanvasPoint> incrYPoints = orderByIncrY(triangle);
+	/*for (size_t i = 0; i < incrYPoints.size(); i++) {
+		std::cout << incrYPoints[0].y << " " << incrYPoints[1].y << " " << incrYPoints[2].y << std::endl;
+	}*/
+
 	/*drawLine(triangle.v0(), triangle.v1(), colour, window);
 	drawLine(triangle.v1(), triangle.v2(), colour, window);
 	drawLine(triangle.v2(), triangle.v0(), colour, window);*/
@@ -242,7 +247,7 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::mat3 camer
 	glm::vec3 adjustedVector = dist * cameraOrientation;
 
 
-	intersectPoint.x = (focalLength * ((adjustedVector.x) / adjustedVector.z));
+	intersectPoint.x = (focalLength * ((-adjustedVector.x) / adjustedVector.z));
 	intersectPoint.y = (focalLength * ((adjustedVector.y) / adjustedVector.z));
 
 	float zDistance = sqrt((pow(cameraPosition.x- vertexPosition.x, 2)+pow(cameraPosition.y - vertexPosition.y,2)+pow(cameraPosition.z - vertexPosition.z,2)));

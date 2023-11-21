@@ -10,6 +10,7 @@ public:
 	glm::mat3 cameraOrientation;
 	float focalLength = 2.0;
 	float theta = 0.003;
+	bool lookAtToggle = false;
 
 	glm::mat3 rotationX = {
 		1.0, 0.0, 0.0,
