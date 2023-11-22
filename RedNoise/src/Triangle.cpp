@@ -4,12 +4,10 @@
 #include <glm/ext.hpp>
 
 
-//#define WIDTH 480
-//#define HEIGHT 360
-#define WIDTH 960
-#define HEIGHT 720
-
-
+#define WIDTH 320
+#define HEIGHT 240
+//#define WIDTH 960
+//#define HEIGHT 720
 
 float zBuffer[WIDTH][HEIGHT] = {}; //actually -1 on both the row and column since starts at 0
 
@@ -251,8 +249,9 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::mat3 camer
 	intersectPoint.y = (focalLength * ((adjustedVector.y) / adjustedVector.z));
 
 	float zDistance = sqrt((pow(cameraPosition.x- vertexPosition.x, 2)+pow(cameraPosition.y - vertexPosition.y,2)+pow(cameraPosition.z - vertexPosition.z,2)));
-
-	intersectPoint.depth = dist.z;
+#
+	//
+	intersectPoint.depth = adjustedVector.z;
 	//intersectPoint.depth = zDistance;
 
 	//std::cout << " intersection point" << intersectPoint << std::endl;
