@@ -6,14 +6,15 @@
 #include <glm/ext.hpp>
 #include "camera.h"
 #include <CanvasPoint.h>
+#include "RedNoise.h"
 
-RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangle, glm::vec3 position, glm::vec3 direction);
+RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangle, glm::vec3 position, glm::vec3 direction, int ignoreIndex);
 
 glm::vec3 directionVectorCalcs(Camera& camera);
 
 glm::vec3 getPointInWorld(float u, float v, Camera& camera);
 
-glm::vec3 getDirectionVector(glm::vec3 vertexPosition, Camera& camera);
+glm::vec3 getDirectionVector(glm::vec3 vertexPositionTo, glm::vec3 vertexPositionFrom);
 
 glm::vec3 getTriangleIntersectionPointT(glm::vec3 cameraPosition, glm::vec3 rayDirection, float t);
 

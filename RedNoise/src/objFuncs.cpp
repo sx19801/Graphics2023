@@ -85,6 +85,9 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 			singleSetVertices.y = scalingFactor * y;
 			singleSetVertices.z = scalingFactor * z;
 
+			//std::cout << "new aksfa (" << singleSetVertices.x << ", " << singleSetVertices.y << ", " << singleSetVertices.z << ")" << std::endl;
+
+
 			multiSetVertices.push_back(singleSetVertices);
 
 		}
@@ -110,6 +113,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 
 				modelTriangle.colour = rgbColour;
 				modelTriangle.colour.name = colourNameGlobal;
+				modelTriangle.normal = calcSurfaceNormal(modelTriangle);
 
 				modelTriangles.push_back(modelTriangle);
 
@@ -122,3 +126,8 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 	return modelTriangles;
 }
 
+glm::vec3 calcSurfaceNormal(ModelTriangle triangle) {
+	glm::vec3 triangleNormal = glm::triangleNormal(triangle.vertices[0], triangle.vertices[1], triangle.vertices[2]);
+	//std::cout << "normal: " << glm::to_string(triangleNormal) << '\n';
+	return triangleNormal;
+}

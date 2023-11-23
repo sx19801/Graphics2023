@@ -9,6 +9,8 @@
 #include <ModelTriangle.h>
 #include <unordered_map>
 #include <glm/glm.hpp>
+#include <glm/gtx/normal.hpp>
+#include <glm/ext.hpp>
 
 
 
@@ -18,4 +20,5 @@ std::unordered_map<std::string, glm::vec3> loadMatOBJ();
 
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor);
 
+glm::vec3 calcSurfaceNormal(ModelTriangle);
 #endif // !OBJFUNCS_H

@@ -69,10 +69,11 @@ void Camera::lookAt(Camera& camera, glm::vec3 lookAtPoint) {
 	right = glm::cross(vertical, forward);
 	up = glm::cross(forward, right);
 
+	//IDK WHY BUT IT WORKS
 	 camera.cameraOrientation = {
-		right,
-		-up,
-		forward,
+		-right,
+		up,
+		-forward,
 	};
 
 }

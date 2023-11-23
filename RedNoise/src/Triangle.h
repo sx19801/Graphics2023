@@ -8,6 +8,10 @@
 #include <vector>
 #include <Colour.h>
 #include <glm/ext.hpp>
+#include <Colour.h>
+#include <algorithm>
+#include "RedNoise.h"
+
 
 std::vector<float> interpolateSingleFloats(float from, float to, int numberOfValues);
 
@@ -15,7 +19,7 @@ void resetDepthBuffer(DrawingWindow& window);
 
 void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow &window);
 
-void drawStrokedTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow &window);
+void drawStrokedTriangle(CanvasTriangle& triangle, Colour colour, DrawingWindow &window);
 
 void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow &window);
 

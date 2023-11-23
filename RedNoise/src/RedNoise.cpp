@@ -1,30 +1,34 @@
-#include <CanvasTriangle.h>
-#include <DrawingWindow.h>
-#include <Utils.h>
-#include <fstream>
-#include <vector>
-#include "Triangle.h"
-#include "camera.h"
-#include "objFuncs.h"
-#include "rayTracing.h"
-
-
-#define WIDTH 320
-#define HEIGHT 240
-//#define WIDTH 960
-//#define HEIGHT 720
+#include "RedNoise.h"
 
 void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera) {
 	for (size_t y = 0; y < HEIGHT; y++) {
 		for (size_t x = 0; x < WIDTH; x++) {
 			glm::vec3 pointInSpace = getPointInWorld(x, y, camera);
-			glm::vec3 directionVector = getDirectionVector(pointInSpace, camera);
-			RayTriangleIntersection closestValidIntersection = getClosestValidIntersection(triangles, camera.cameraPosition, directionVector);
+			glm::vec3 directionVector = getDirectionVector(pointInSpace, camera.cameraPosition);
+			RayTriangleIntersection closestValidIntersection = getClosestValidIntersection(triangles, camera.cameraPosition, directionVector, -1);
+
 			if (closestValidIntersection.valid == true) {
+				//glm::vec3 offsetPoint = 1.0f * 
+				glm::vec3 directionVector2 = getDirectionVector(LIGHTSOURCE, closestValidIntersection.intersectionPoint);
+				RayTriangleIntersection checkShadowIntersectionPoint = getClosestValidIntersection(triangles, closestValidIntersection.intersectionPoint, directionVector2, closestValidIntersection.triangleIndex);
+
+				float pointToLight = glm::distance(closestValidIntersection.intersectionPoint, glm::vec3(LIGHTSOURCE));
+				float distance2 = glm::distance(closestValidIntersection.intersectionPoint, checkShadowIntersectionPoint.intersectionPoint);
+				
 				Colour colour = closestValidIntersection.intersectedTriangle.colour;
 				uint32_t colourUint32 = (255 << 24) + (colour.red << 16) + (colour.green << 8) + colour.blue;
-				window.setPixelColour(x, y, colourUint32);
+				if ((distance2 < pointToLight) && (distance2 > 0)) {
+					window.setPixelColour(x, y, BLACK);
+				}
+				else {
+					window.setPixelColour(x, y, colourUint32);
+					//_sleep(50);
+					//window.renderFrame();
+				}
+				//if no shadows then colour as regular colour if shadow then use black
 			}
+
+
 
 		}
 
@@ -32,8 +36,8 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 	
 }
 
-void draw(DrawingWindow& window, std::vector<ModelTriangle> triangles, Camera& camera) {
-	//resetDepthBuffer(window);
+void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera) {
+	resetDepthBuffer(window);
 	if (camera.lookAtToggle == true){
 		camera.orbit(camera, camera.theta);
 		camera.lookAt(camera, camera.lookAtPoint);
@@ -41,7 +45,7 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle> triangles, Camera& c
 	CanvasPoint imagePlanePoint;
 	CanvasTriangle canvasPointTriangle;
 	CanvasPoint scaledImagePlanePoint;
-	float scalingFactor = 120;
+	float scalingFactor = 80;
 
 	float maxZImagePlanePoint = -10;
 	float minZImagePlanePoint = 10;
@@ -83,19 +87,45 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle> triangles, Camera& c
 			drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window);
 		}*/
 		
-		uint32_t colourUint32 = (255 << 24) + (255 << 16) + (0 << 8) + 0;
-		window.setPixelColour(WIDTH / 2, HEIGHT / 2, colourUint32);
-		window.renderFrame();
+		//uint32_t red = (255 << 24) + (255 << 16) + (0 << 8) + 0;
+		//window.setPixelColour(WIDTH / 2, HEIGHT / 2, red);
+		//window.renderFrame();
 		
 	}
 	//draw is setting pixel colours
 	// calling canvasintersectionpoint for each vertex of each triangle
 	//resetDepthBuffer(window);
 }
+void drawRefLines(DrawingWindow& window, int mode) {
+	drawLine(CanvasPoint(WIDTH / 2, 0), CanvasPoint(WIDTH / 2, 20), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(WIDTH / 2, HEIGHT), CanvasPoint(WIDTH / 2, HEIGHT-20), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(WIDTH / 4, 0), CanvasPoint(WIDTH / 4, 20), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(3*WIDTH / 4, 0), CanvasPoint(3*WIDTH / 4, 20), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(0, HEIGHT/4), CanvasPoint(20, (HEIGHT/4)), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(0, 3 * HEIGHT / 4), CanvasPoint(20,(3 * HEIGHT / 4)), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(0, HEIGHT/2), CanvasPoint(20, HEIGHT/2), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(WIDTH, HEIGHT/2), CanvasPoint(WIDTH-20,HEIGHT/2), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(WIDTH, HEIGHT / 4), CanvasPoint(WIDTH-20, (HEIGHT / 4)), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(WIDTH, 3 * HEIGHT / 4), CanvasPoint(WIDTH-20, (3 * HEIGHT / 4)), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(WIDTH/4, HEIGHT), CanvasPoint(WIDTH/4, HEIGHT-20), Colour(255, 0, 0), window);
+	drawLine(CanvasPoint(3*WIDTH/4, HEIGHT), CanvasPoint(3*WIDTH/4, (HEIGHT-20)), Colour(255, 0, 0), window);
 
-void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera) {
+	if (mode == 1){
+		drawLine(CanvasPoint(0, HEIGHT / 2), CanvasPoint(WIDTH, HEIGHT / 2), Colour(255, 0, 0), window);
+		drawLine(CanvasPoint(0, HEIGHT / 4), CanvasPoint(WIDTH, HEIGHT/4), Colour(255, 0, 0), window);
+		drawLine(CanvasPoint(0, 3*HEIGHT / 4), CanvasPoint(WIDTH, (3*HEIGHT / 4)), Colour(255, 0, 0), window);
+		drawLine(CanvasPoint(WIDTH/2, 0), CanvasPoint(WIDTH /2, (HEIGHT)), Colour(255, 0, 0), window);
+		drawLine(CanvasPoint(3*WIDTH / 4, 0), CanvasPoint(3*WIDTH / 4, HEIGHT), Colour(255, 0, 0), window);
+		drawLine(CanvasPoint(WIDTH / 4, 0), CanvasPoint(WIDTH / 4, HEIGHT), Colour(255, 0, 0), window);
+	}
+
+}
+
+void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& renderType) {
 	int mode;
 	float theta = 0.5;
+	float scalingFactor = 0.35;
+	std::vector<ModelTriangle>& triangles = loadGeoOBJ(scalingFactor);
 	if (event.type == SDL_KEYDOWN) {
 		if (event.key.keysym.sym == SDLK_LEFT) { 
 			mode = 1;
@@ -149,9 +179,6 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera) {
 			//std::cout << "triangles size " << triangles.size() << std::endl;
 			//for (size_t i = 0; i < triangles.size(); i++) { std::cout << "triangle: " << triangles[i] << " i: " << i << std::endl; }
 			std::cout << "triangles2 " << triangles[26] << std::endl;
-			
-			draw(window, triangles, camera);
-			draw(window, triangles2, camera);
 
 			
 		}
@@ -214,8 +241,34 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera) {
 		}
 		else if (event.key.keysym.sym == SDLK_m) {
 			std::cout << "testing" << std::endl;
-			directionVectorCalcs(camera);
-			}
+			//directionVectorCalcs(camera);
+			float scalingFactor = 0.35;
+			;
+			drawRayTracing(window, triangles, camera);
+			int mode = 1;
+			//drawRefLines(window, mode);
+
+		}
+		else if (event.key.keysym.sym == SDLK_s) {
+			std::cout << "wireframe" << std::endl;
+			std::vector<ModelTriangle>& triangles = loadGeoOBJ(0.35);
+			resetDepthBuffer(window);
+			draw(window, triangles, camera);
+		}
+		else if (event.key.keysym.sym == SDLK_1) {
+			std::cout << "wireframe" << std::endl;
+			renderType = 1;
+		}
+		else if (event.key.keysym.sym == SDLK_2) {
+			std::cout << "rasterised" << std::endl;
+			renderType = 2;
+		}
+		else if (event.key.keysym.sym == SDLK_3) {
+			std::cout << "raytrace" << std::endl;
+			renderType = 3;
+			
+		}
+
 	}
 	else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		window.savePPM("output.ppm");
@@ -231,13 +284,25 @@ int main(int argc, char* argv[]) {
 	srand((unsigned int)time(NULL));
 	float scalingFactor = 0.35;
 	Camera camera;
+	int renderType = 1;
 	//drawRayTracing(window, triangles, camera);
 	std::vector<ModelTriangle>& triangles = loadGeoOBJ(scalingFactor);
 	while (true) {
-		if (window.pollForInputEvents(event)) handleEvent(event, window, camera);
+		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType);
+
+		if (renderType == 1) {
+			draw(window, triangles, camera);
+		}
+		else if (renderType == 2) {
+
+		}
+		else if (renderType == 3) {
+			drawRayTracing(window, triangles, camera);
+		}
+
 		//draw(window, triangles, camera);
-		drawRayTracing(window, triangles, camera);
+		//drawRayTracing(window, triangles, camera);
 		window.renderFrame();
-		std::cout << "done";
+		//std::cout << "done";
 	}
 }

@@ -3,9 +3,6 @@
 #include<algorithm>
 #include <glm/ext.hpp>
 
-
-#define WIDTH 320
-#define HEIGHT 240
 //#define WIDTH 960
 //#define HEIGHT 720
 
@@ -165,11 +162,11 @@ void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& wi
 	}
 }
 
-void drawStrokedTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& window) {
+void drawStrokedTriangle(CanvasTriangle& triangle, Colour colour, DrawingWindow& window) {
 	drawLine(triangle.v0(), triangle.v1(), colour, window);
 	drawLine(triangle.v1(), triangle.v2(), colour, window);
 	drawLine(triangle.v2(), triangle.v0(), colour, window);
-	std::cout << triangle.v0() << " " << triangle.v1() << " " << triangle.v2() << std::endl;
+	//std::cout << triangle.v0() << " " << triangle.v1() << " " << triangle.v2() << std::endl;
 }
 
 void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& window) {

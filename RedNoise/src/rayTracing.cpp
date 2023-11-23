@@ -1,11 +1,9 @@
 #include "rayTracing.h"
 
 
-#define WIDTH 320
-#define HEIGHT 240
 #define PI 3.141592
 
-RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangles, glm::vec3 cameraPosition, glm::vec3 rayDirection) {
+RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangles, glm::vec3 originalPoint, glm::vec3 rayDirection, int ignoreIndex) {
 	RayTriangleIntersection closestIntersection;
 	float closestIntersectedPointT = 1000;
 
@@ -14,7 +12,7 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 
 		glm::vec3 e0 = triangle.vertices[1] - triangle.vertices[0];
 		glm::vec3 e1 = triangle.vertices[2] - triangle.vertices[0];
-		glm::vec3 SPVector = cameraPosition - triangle.vertices[0];
+		glm::vec3 SPVector = originalPoint - triangle.vertices[0];
 		glm::mat3 DEMatrix(-rayDirection, e0, e1);
 		glm::vec3 possibleSolution = glm::inverse(DEMatrix) * SPVector;
 
@@ -24,24 +22,37 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 		//std::cout << t << " " << u << " " << v << '\n'; //all the u and vs are huge
 
 
-		//u v check \/  and check that t (dist from camera to intersection) is positive   DO CHECKS REQUIRE NORMALISED POINTS?????
+
+		//u v check \/  and check that t (dist from camera to intersection) is positive
 		if ((u >= 0.0) && (u <= 1.0) && (v >= 0.0) && (v <= 1.0) && ((u + v) <= 1.0)) {
 			//std::cout << "t: " << t << " u: " << u << " v: " << v << std::endl;
-			if (t > 0) {
+//			if (t > 0 && i != ignoreIndex && t > 0.0001) {
+			if (t > 0.04) {
 				glm::vec3 normalisedDirection = normalise(rayDirection);
 				//SMALLEST T VALUE CHECK \/
-				if (t < closestIntersectedPointT) {
-					closestIntersection.intersectionPoint = getTriangleIntersectionPointT(cameraPosition, normalisedDirection, t);
-					
+				if ((t < closestIntersectedPointT) && ignoreIndex != i) {
+					closestIntersection.intersectionPoint = getTriangleIntersectionPointT(originalPoint, normalisedDirection, t);
+					closestIntersection.distanceFromPoints = glm::distance(glm::vec3(LIGHTSOURCE), closestIntersection.intersectionPoint);
 					closestIntersection.intersectedTriangle = triangles[i];
+					closestIntersection.triangleIndex = i;
 					closestIntersectedPointT = t;
 					closestIntersection.valid = true;
+						//std::cout << "i: " << i << " t: " << t << " distance from point to light source: " << closestIntersection.distanceFromPoints << " intersection point: " << glm::to_string(closestIntersection.intersectionPoint) << '\n';
 					
 				}
 			}
-
 		}
 	}
+
+	//CHECK FOR NO VALID INTERSECTIONS
+	if (closestIntersection.valid == false) {
+		closestIntersection.intersectionPoint = originalPoint;
+		closestIntersection.distanceFromPoints = glm::distance(glm::vec3(LIGHTSOURCE), closestIntersection.intersectionPoint);
+		closestIntersection.valid = true;
+	}
+
+	//std::cout << "shadow bool:   " << closestIntersection.shadow << '\n';
+	//closestIntersection.shadow = true;
 	//You are looping through all the triangels so if the first one intersects valid is true but if the last one doesnt valid is false. Need 
 	return closestIntersection;
 	
@@ -49,24 +60,25 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 
 
 
-glm::vec3 getTriangleIntersectionPointT(glm::vec3 cameraPosition, glm::vec3 rayDirection, float t) {
-	glm::vec3 intersectionPoint = cameraPosition + rayDirection * t;
+glm::vec3 getTriangleIntersectionPointT(glm::vec3 originalPoint, glm::vec3 rayDirection, float t) {
+	glm::vec3 intersectionPoint = originalPoint + t*rayDirection ;
 	return intersectionPoint;
 }
 
 
-glm::vec3 getPointInWorld(float u, float v, Camera& camera) {
+glm::vec3 getPointInWorld(float u, float v, Camera& camera) {									
 	float scalingFactor = 80;
-	float x = ((WIDTH - u) - (float(WIDTH)) / 2) / (scalingFactor * camera.focalLength);
+	float x = (u - (float(WIDTH)) / 2) / (scalingFactor * camera.focalLength);
 	float y = (v - (float(HEIGHT)) / 2) / (scalingFactor * camera.focalLength);
 
-	glm::vec3 distance = glm::vec3(x, y, camera.focalLength) * glm::inverse(camera.cameraOrientation);
+	glm::vec3 distance = glm::vec3(x, -y, -1) * glm::inverse(camera.cameraOrientation); // THIS MIGHT NEED TO BE CHANGED IN FUTURE WITH CAMERA ROTATION/ORIENTATION
 	glm::vec3 vertexPosition = distance + camera.cameraPosition;
 	return vertexPosition;
 }
 
-glm::vec3 getDirectionVector(glm::vec3 vertexPosition, Camera& camera) {
-	glm::vec3 directionVector = normalise(camera.cameraPosition - vertexPosition);
+
+glm::vec3 getDirectionVector(glm::vec3 vertexPositionTo, glm::vec3 vertexPositionFrom) {		//all good
+	glm::vec3 directionVector = normalise( vertexPositionTo - vertexPositionFrom);
 	return directionVector;
 }
 
@@ -77,7 +89,7 @@ glm::vec3 directionVectorCalcs(Camera& camera) {
 	float fov = atan(1 / camera.focalLength)*2;
 	float scaling = tan(fov/2);
 	float aspectRatio = float(WIDTH) / float(HEIGHT);
-	std::cout << aspectRatio << '\n';
+	//std::cout << aspectRatio << '\n';
 	//changing xy into screen space coords
 	float xNorm = (2 * ((xy.x + 0.5) / WIDTH) - 1) * aspectRatio * tan(fov / 2);
 	float yNorm = (1 - 2 * ((xy.y + 0.5) / HEIGHT)) * tan(fov / 2);
@@ -91,9 +103,9 @@ glm::vec3 directionVectorCalcs(Camera& camera) {
 
 	//wrong below
 	glm::vec3 directionVector = rayDirection - rayOrigin;
-	std::cout << glm::to_string(directionVector) << '\n';
+	//std::cout << glm::to_string(directionVector) << '\n';
 	directionVector = normalise(directionVector);
-	std::cout << glm::to_string(directionVector) << '\n';
+	//std::cout << glm::to_string(directionVector) << '\n';
 	return directionVector;
 		
 	
