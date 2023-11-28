@@ -8,7 +8,7 @@
 #include <CanvasPoint.h>
 #include "RedNoise.h"
 
-RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangle, glm::vec3 position, glm::vec3 direction, int ignoreIndex);
+RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangle, glm::vec3 position, glm::vec3 direction, int ignoreIndex, Camera& camera);
 
 glm::vec3 directionVectorCalcs(Camera& camera);
 

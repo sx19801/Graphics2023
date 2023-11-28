@@ -1,26 +1,39 @@
 #include "RedNoise.h"
 
 void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera) {
+	Colour colour;
+
 	for (size_t y = 0; y < HEIGHT; y++) {
 		for (size_t x = 0; x < WIDTH; x++) {
 			glm::vec3 pointInSpace = getPointInWorld(x, y, camera);
 			glm::vec3 directionVector = getDirectionVector(pointInSpace, camera.cameraPosition);
-			RayTriangleIntersection closestValidIntersection = getClosestValidIntersection(triangles, camera.cameraPosition, directionVector, -1);
+			RayTriangleIntersection closestValidIntersection = getClosestValidIntersection(triangles, camera.cameraPosition, directionVector, -1, camera);
 
 			if (closestValidIntersection.valid == true) {
 				//glm::vec3 offsetPoint = 1.0f * 
-				glm::vec3 directionVector2 = getDirectionVector(LIGHTSOURCE, closestValidIntersection.intersectionPoint);
-				RayTriangleIntersection checkShadowIntersectionPoint = getClosestValidIntersection(triangles, closestValidIntersection.intersectionPoint, directionVector2, closestValidIntersection.triangleIndex);
+				colour = closestValidIntersection.intersectedTriangle.colour;
 
-				float pointToLight = glm::distance(closestValidIntersection.intersectionPoint, glm::vec3(LIGHTSOURCE));
+				glm::vec3 directionVector2 = getDirectionVector(camera.lightSource, closestValidIntersection.intersectionPoint);
+				RayTriangleIntersection checkShadowIntersectionPoint = getClosestValidIntersection(triangles, closestValidIntersection.intersectionPoint, directionVector2, closestValidIntersection.triangleIndex, camera);
+
+				float pointToLight = glm::distance(closestValidIntersection.intersectionPoint, camera.lightSource);
 				float distance2 = glm::distance(closestValidIntersection.intersectionPoint, checkShadowIntersectionPoint.intersectionPoint);
 				
-				Colour colour = closestValidIntersection.intersectedTriangle.colour;
-				uint32_t colourUint32 = (255 << 24) + (colour.red << 16) + (colour.green << 8) + colour.blue;
 				if ((distance2 < pointToLight) && (distance2 > 0)) {
 					window.setPixelColour(x, y, BLACK);
 				}
 				else {
+
+					
+					float intensity = (6 / (7 * M_PI * pow(pointToLight, 2)));
+					//glm::clamp(0.0f, 1.0f, intensity);
+					if (intensity > 1){
+						intensity = 1;
+					}
+					if (pointToLight < 1){
+						std::cout << pointToLight << '\n';
+					}
+					uint32_t colourUint32 = (255 << 24) + (int(round(colour.red*intensity)) << 16) + (int(round(colour.green*intensity)) << 8) + int(round(colour.blue*intensity)	);
 					window.setPixelColour(x, y, colourUint32);
 					//_sleep(50);
 					//window.renderFrame();
@@ -249,11 +262,25 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 			//drawRefLines(window, mode);
 
 		}
+		else if (event.key.keysym.sym == SDLK_w) {
+			std::cout << "move light source positive in y" << std::endl;
+			camera.lightSource.y = camera.lightSource.y + 0.1;
+			std::cout << glm::to_string(camera.lightSource) << '\n';
+		}
+		else if (event.key.keysym.sym == SDLK_a) {
+			std::cout << "move light source negative in x" << std::endl;
+			camera.lightSource.x = camera.lightSource.x - 0.1;
+			std::cout << glm::to_string(camera.lightSource) << '\n';
+		}
 		else if (event.key.keysym.sym == SDLK_s) {
-			std::cout << "wireframe" << std::endl;
-			std::vector<ModelTriangle>& triangles = loadGeoOBJ(0.35);
-			resetDepthBuffer(window);
-			draw(window, triangles, camera);
+			std::cout << "move light source negative in y" << std::endl;
+			camera.lightSource.y = camera.lightSource.y - 0.1;
+			std::cout << glm::to_string(camera.lightSource) << '\n';
+		}
+		else if (event.key.keysym.sym == SDLK_d) {
+			std::cout << "move light source positive in x" << std::endl;
+			camera.lightSource.x = camera.lightSource.x + 0.1;
+			std::cout << glm::to_string(camera.lightSource) << '\n';
 		}
 		else if (event.key.keysym.sym == SDLK_1) {
 			std::cout << "wireframe" << std::endl;

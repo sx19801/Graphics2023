@@ -58,6 +58,7 @@ void Camera::lookAt(Camera& camera, glm::vec3 lookAtPoint) {
 	glm::vec3 up;
 	glm::vec3 vertical = { 0.0, 1.0, 0.0 };
 
+
 	glm::vec3 forward = lookAtPoint - camera.cameraPosition;
 
 	//need to normalise forward 

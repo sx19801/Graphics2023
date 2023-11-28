@@ -3,7 +3,7 @@
 
 #define PI 3.141592
 
-RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangles, glm::vec3 originalPoint, glm::vec3 rayDirection, int ignoreIndex) {
+RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangles, glm::vec3 originalPoint, glm::vec3 rayDirection, int ignoreIndex, Camera& camera) {
 	RayTriangleIntersection closestIntersection;
 	float closestIntersectedPointT = 1000;
 
@@ -32,7 +32,7 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 				//SMALLEST T VALUE CHECK \/
 				if ((t < closestIntersectedPointT) && ignoreIndex != i) {
 					closestIntersection.intersectionPoint = getTriangleIntersectionPointT(originalPoint, normalisedDirection, t);
-					closestIntersection.distanceFromPoints = glm::distance(glm::vec3(LIGHTSOURCE), closestIntersection.intersectionPoint);
+					closestIntersection.distanceFromPoints = glm::distance(camera.lightSource, closestIntersection.intersectionPoint);
 					closestIntersection.intersectedTriangle = triangles[i];
 					closestIntersection.triangleIndex = i;
 					closestIntersectedPointT = t;
@@ -47,7 +47,7 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 	//CHECK FOR NO VALID INTERSECTIONS
 	if (closestIntersection.valid == false) {
 		closestIntersection.intersectionPoint = originalPoint;
-		closestIntersection.distanceFromPoints = glm::distance(glm::vec3(LIGHTSOURCE), closestIntersection.intersectionPoint);
+		closestIntersection.distanceFromPoints = glm::distance(camera.lightSource, closestIntersection.intersectionPoint);
 		closestIntersection.valid = true;
 	}
 
