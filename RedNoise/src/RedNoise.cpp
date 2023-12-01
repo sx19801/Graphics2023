@@ -39,15 +39,14 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 				//else{
 					//colourUint32 = (255 << 24) + (int(round(colour.red * intensity)) << 16) + (int(round(colour.green * intensity)) << 8) + int(round(colour.blue * intensity));
 					
-				if (closestValidIntersection.intersectedTriangle.colour.name == "White") {
-					std::cout << "ello" << '\n';
-				}
-					if (lightType == 1) { //proximity
+					switch (lightType)
+					{
+					case 1:
 						intensity = proximityLightIntensity(pointToLightDist, intensity);
 						colourUint32 = (255 << 24) + (int(round(colour.red * intensity)) << 16) + (int(round(colour.green * intensity)) << 8) + int(round(colour.blue * intensity));
-					}
-					else if (lightType == 2) { //angle of incidence
-						//std::cout << "yo" << '\n';
+						break;
+
+					case 2:
 						aoi = angleOfIncidence(normalise(closestValidIntersection.intersectedTriangle.normal), normalise(lightDirectionVector));
 						//std::cout << aoi << '\n';
 						if (aoi < 0) {
@@ -56,16 +55,18 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 						if (aoi > 1) std::cout << aoi << '\n';
 						colourUint32 = (255 << 24) + (int(round(colour.red * aoi)) << 16) + (int(round(colour.green * aoi)) << 8) + int(round(colour.blue * aoi));
 						//std::cout << aoi << '\n';
-					}
-					else if (lightType == 3) {
+						break;
+
+					case 3:
 						intensity = proximityLightIntensity(pointToLightDist, intensity);
 						aoi = angleOfIncidence(normalise(closestValidIntersection.intersectedTriangle.normal), normalise(lightDirectionVector));
 						if (aoi < 0.2) aoi = 0.2;
 						combine = (intensity * aoi);
 						//if (combine < 0) combine = 0;
 						if (combine > 1) combine = 1;
-						
+
 						colourUint32 = (255 << 24) + (int(round(colour.red * combine)) << 16) + (int(round(colour.green * combine)) << 8) + int(round(colour.blue * combine));
+						break;
 					}
 					window.setPixelColour(x, y, colourUint32);
 					//_sleep(50);
@@ -122,10 +123,6 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 			drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window);
 		}
 
-		//drawStrokedTriangle(canvasPointTriangle, triangles[i].colour, window);
-		//drawStrokedTriangle(canvasPointTriangle, triangles[i].colour, window);
-		//if ((camera.cameraPosition.z > maxZImagePlanePoint)) {
-
 		if (renderType == 2) {
 			drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window);
 		}
@@ -133,15 +130,9 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 			drawStrokedTriangle(canvasPointTriangle, triangles[i].colour, window);
 		}
 
-		//uint32_t red = (255 << 24) + (255 << 16) + (0 << 8) + 0;
-		//window.setPixelColour(WIDTH / 2, HEIGHT / 2, red);
-		//window.renderFrame();
-
 	}
-	//draw is setting pixel colours
-	// calling canvasintersectionpoint for each vertex of each triangle
-	//resetDepthBuffer(window);
 }
+
 
 void drawRefLines(DrawingWindow& window) {
 	//drawLine(CanvasPoint(WIDTH / 2, 0), CanvasPoint(WIDTH / 2, 20), Colour(255, 0, 0), window);
@@ -319,7 +310,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 			lightType = 2;
 		}
 		else if (event.key.keysym.sym == SDLK_8) {
-			std::cout << "aoi" << '\n';
+			std::cout << "combined" << '\n';
 			lightType = 3;
 		}
 		else if (event.type == SDL_MOUSEBUTTONDOWN) {

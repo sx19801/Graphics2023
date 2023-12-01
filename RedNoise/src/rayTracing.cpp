@@ -34,9 +34,9 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 					closestIntersection.distanceFromPoints = glm::distance(camera.lightSource, closestIntersection.intersectionPoint);
 					closestIntersection.intersectedTriangle = triangles[i];
 					closestIntersection.triangleIndex = i;
-					closestIntersectedPointT = t;
 					closestIntersection.valid = true;
 					closestIntersection.intersectedTriangle.normal = triangles[i].normal;
+					closestIntersectedPointT = t;
 						//std::cout << "i: " << i << " t: " << t << " distance from point to light source: " << closestIntersection.distanceFromPoints << " intersection point: " << glm::to_string(closestIntersection.intersectionPoint) << '\n';
 					
 				}
