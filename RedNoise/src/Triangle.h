@@ -13,6 +13,7 @@
 #include "RedNoise.h"
 
 
+
 std::vector<float> interpolateSingleFloats(float from, float to, int numberOfValues);
 
 void resetDepthBuffer(DrawingWindow& window);

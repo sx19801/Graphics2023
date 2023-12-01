@@ -10,9 +10,13 @@
 #include "camera.h"
 #include "objFuncs.h"
 #include "rayTracing.h"
+#include "lightShade.h"
+
 
 #define WIDTH 320
 #define HEIGHT 240
+//#define WIDTH 640
+//#define HEIGHT 480
 #define BLACK (255 << 24) + (0 << 16) + (0 << 8) + 0
 #define RED (255 << 24) + (255 << 16) + (0 << 8) + 0
 

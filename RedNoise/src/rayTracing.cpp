@@ -1,7 +1,6 @@
 #include "rayTracing.h"
 
 
-#define PI 3.141592
 
 RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangles, glm::vec3 originalPoint, glm::vec3 rayDirection, int ignoreIndex, Camera& camera) {
 	RayTriangleIntersection closestIntersection;
@@ -21,7 +20,7 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 		float v = possibleSolution[2];
 		//std::cout << t << " " << u << " " << v << '\n'; //all the u and vs are huge
 
-
+	//	std::cout << glm::to_string(triangle.normal) << '\n';
 
 		//u v check \/  and check that t (dist from camera to intersection) is positive
 		if ((u >= 0.0) && (u <= 1.0) && (v >= 0.0) && (v <= 1.0) && ((u + v) <= 1.0)) {
@@ -37,6 +36,7 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 					closestIntersection.triangleIndex = i;
 					closestIntersectedPointT = t;
 					closestIntersection.valid = true;
+					closestIntersection.intersectedTriangle.normal = triangles[i].normal;
 						//std::cout << "i: " << i << " t: " << t << " distance from point to light source: " << closestIntersection.distanceFromPoints << " intersection point: " << glm::to_string(closestIntersection.intersectionPoint) << '\n';
 					
 				}
@@ -67,7 +67,7 @@ glm::vec3 getTriangleIntersectionPointT(glm::vec3 originalPoint, glm::vec3 rayDi
 
 
 glm::vec3 getPointInWorld(float u, float v, Camera& camera) {									
-	float scalingFactor = 80;
+	float scalingFactor = camera.scalingFactor;
 	float x = (u - (float(WIDTH)) / 2) / (scalingFactor * camera.focalLength);
 	float y = (v - (float(HEIGHT)) / 2) / (scalingFactor * camera.focalLength);
 
@@ -77,7 +77,7 @@ glm::vec3 getPointInWorld(float u, float v, Camera& camera) {
 }
 
 
-glm::vec3 getDirectionVector(glm::vec3 vertexPositionTo, glm::vec3 vertexPositionFrom) {		//all good
+glm::vec3 getDirectionVector(glm::vec3 vertexPositionTo, glm::vec3 vertexPositionFrom) {		
 	glm::vec3 directionVector = normalise( vertexPositionTo - vertexPositionFrom);
 	return directionVector;
 }

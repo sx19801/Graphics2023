@@ -98,6 +98,10 @@ bool compareOnScreen(float u, float v) {
 }
 
 void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& window) {
+	//if (!(colour.name == "Red" || colour.name == "Yellow")) return;
+	if (from.x == 167 && from.y == 145) {
+		std::cout << "HI";
+	}
 	float toX = (to.x);
 	float fromX = (from.x);
 	float toY = (to.y);

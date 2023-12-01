@@ -1,4 +1,5 @@
 #include "objFuncs.h"
+#include "rayTracing.h"
 
 
 glm::vec3 convMtlToInt(glm::vec3 colourValues) {
@@ -114,6 +115,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 				modelTriangle.colour = rgbColour;
 				modelTriangle.colour.name = colourNameGlobal;
 				modelTriangle.normal = calcSurfaceNormal(modelTriangle);
+				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
 
 				modelTriangles.push_back(modelTriangle);
 
@@ -127,7 +129,13 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 }
 
 glm::vec3 calcSurfaceNormal(ModelTriangle triangle) {
-	glm::vec3 triangleNormal = glm::triangleNormal(triangle.vertices[0], triangle.vertices[1], triangle.vertices[2]);
+	//glm::vec3 triangleNormal = glm::triangleNormal(triangle.vertices[1], triangle.vertices[2], triangle.vertices[0]);
+	//cool stuff happens if use line below 
+	glm::vec3 e0 = triangle.vertices[1] - triangle.vertices[0];
+	glm::vec3 e1 = triangle.vertices[2] - triangle.vertices[0];
+	glm::vec3 triangleNormal = glm::cross(e0, e1);
+	
+	//triangleNormal = normalise(triangleNormal);
 	//std::cout << "normal: " << glm::to_string(triangleNormal) << '\n';
 	return triangleNormal;
 }
