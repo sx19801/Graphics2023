@@ -1,17 +1,15 @@
 #include "rayTracing.h"
 
 
-
 RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangles, glm::vec3 originalPoint, glm::vec3 rayDirection, int ignoreIndex, Camera& camera) {
-	RayTriangleIntersection closestIntersection;
 	float closestIntersectedPointT = 1000;
+	RayTriangleIntersection closestIntersection;
 
 	for (size_t i = 0; i < triangles.size(); i++) {
-		ModelTriangle triangle = triangles[i];
 
-		glm::vec3 e0 = triangle.vertices[1] - triangle.vertices[0];
-		glm::vec3 e1 = triangle.vertices[2] - triangle.vertices[0];
-		glm::vec3 SPVector = originalPoint - triangle.vertices[0];
+		glm::vec3 e0 = triangles[i].vertices[1] - triangles[i].vertices[0];
+		glm::vec3 e1 = triangles[i].vertices[2] - triangles[i].vertices[0];
+		glm::vec3 SPVector = originalPoint - triangles[i].vertices[0];
 		glm::mat3 DEMatrix(-rayDirection, e0, e1);
 		glm::vec3 possibleSolution = glm::inverse(DEMatrix) * SPVector;
 
@@ -25,23 +23,19 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 		//u v check \/  and check that t (dist from camera to intersection) is positive
 		if ((u >= 0.0) && (u <= 1.0) && (v >= 0.0) && (v <= 1.0) && ((u + v) <= 1.0)) {
 			//std::cout << "t: " << t << " u: " << u << " v: " << v << std::endl;
-//			if (t > 0 && i != ignoreIndex && t > 0.0001) {
-			if (t > 0.04) {
-				glm::vec3 normalisedDirection = normalise(rayDirection);
-				//SMALLEST T VALUE CHECK \/
-				if ((t < closestIntersectedPointT) && ignoreIndex != i) {
-					closestIntersection.intersectionPoint = getTriangleIntersectionPointT(originalPoint, normalisedDirection, t);
-					closestIntersection.distanceFromPoints = glm::distance(camera.lightSource, closestIntersection.intersectionPoint);
-					closestIntersection.intersectedTriangle = triangles[i];
-					closestIntersection.triangleIndex = i;
-					closestIntersection.valid = true;
-					closestIntersection.intersectedTriangle.normal = triangles[i].normal;
-					closestIntersectedPointT = t;
-						//std::cout << "i: " << i << " t: " << t << " distance from point to light source: " << closestIntersection.distanceFromPoints << " intersection point: " << glm::to_string(closestIntersection.intersectionPoint) << '\n';
-					
-				}
+			if (i != ignoreIndex && t > 0.015 && t < closestIntersectedPointT) {
+				closestIntersection.intersectionPoint = getTriangleIntersectionPointT(originalPoint, normalise(rayDirection), t);
+				closestIntersection.distanceFromPoints = glm::distance(camera.lightSource, closestIntersection.intersectionPoint);
+				closestIntersection.intersectedTriangle = triangles[i];
+				closestIntersection.triangleIndex = i;
+				closestIntersection.valid = true;
+				closestIntersection.intersectedTriangle.normal = triangles[i].normal;
+				closestIntersectedPointT = t;
+				//std::cout << "i: " << i << " t: " << t << " distance from point to light source: " << closestIntersection.distanceFromPoints << " intersection point: " << glm::to_string(closestIntersection.intersectionPoint) << '\n';
+
 			}
 		}
+	
 	}
 
 	//CHECK FOR NO VALID INTERSECTIONS
@@ -61,15 +55,13 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 
 
 glm::vec3 getTriangleIntersectionPointT(glm::vec3 originalPoint, glm::vec3 rayDirection, float t) {
-	glm::vec3 intersectionPoint = originalPoint + t*rayDirection ;
-	return intersectionPoint;
+	return originalPoint + t * rayDirection;
 }
 
 
 glm::vec3 getPointInWorld(float u, float v, Camera& camera) {									
-	float scalingFactor = camera.scalingFactor;
-	float x = (u - (float(WIDTH)) / 2) / (scalingFactor * camera.focalLength);
-	float y = (v - (float(HEIGHT)) / 2) / (scalingFactor * camera.focalLength);
+	float x = (u - (float(WIDTH)) / 2) / (camera.scalingFactor * camera.focalLength);
+	float y = (v - (float(HEIGHT)) / 2) / (camera.scalingFactor * camera.focalLength);
 
 	glm::vec3 distance = glm::vec3(x, -y, -1) * glm::inverse(camera.cameraOrientation); // THIS MIGHT NEED TO BE CHANGED IN FUTURE WITH CAMERA ROTATION/ORIENTATION
 	glm::vec3 vertexPosition = distance + camera.cameraPosition;

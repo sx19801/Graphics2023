@@ -49,20 +49,26 @@ std::unordered_map<std::string, glm::vec3> loadMatOBJ() {
 	return colourMap;
 }
 
+
+
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 	std::string myText;
 	std::ifstream MyReadFile("../../../OBJFiles/cornell-box.obj");
+	std::ifstream MyReadFileSphere("../../../OBJFiles/sphere.obj");
 
 	Colour rgbColour;
 	ModelTriangle modelTriangle;
 	std::vector<ModelTriangle> modelTriangles;
-	std::vector<glm::vec3> multiSetVertices;
-	glm::vec3 singleSetVertices;
+
 	glm::vec3 trianglePoints;
 	std::string colourNameGlobal;
 	glm::vec3 rgbValues;
 
+	std::vector<glm::vec3> multiSetVertices;
+	glm::vec3 singleSetVertices;
+
 	std::unordered_map<std::string, glm::vec3> colourMap = loadMatOBJ();
+	
 	while (getline(MyReadFile, myText)) {
 		std::stringstream ss(myText);
 		std::string identifier;
@@ -114,7 +120,65 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 
 				modelTriangle.colour = rgbColour;
 				modelTriangle.colour.name = colourNameGlobal;
-				modelTriangle.normal = calcSurfaceNormal(modelTriangle);
+				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
+				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
+
+				//modelTriangles.push_back(modelTriangle);
+
+			}
+		}
+
+	}
+
+	std::vector<glm::vec3> multiSetVertices2;
+	glm::vec3 singleSetVertices2;
+
+	while (getline(MyReadFileSphere, myText)) {
+		float scalingFactor2 = 0.3;
+		std::stringstream ss(myText);
+		std::string identifier;
+		ss >> identifier;
+
+		if (identifier == "v") {
+
+			float x, y, z;
+			ss >> x >> y >> z;
+
+			//SCALING FACTOR INTRODUCED HERE
+
+			singleSetVertices2.x = scalingFactor2 * x;
+			singleSetVertices2.y = scalingFactor2 * y;
+			singleSetVertices2.z = scalingFactor2 * z;
+
+			//std::cout << "new aksfa (" << singleSetVertices.x << ", " << singleSetVertices.y << ", " << singleSetVertices.z << ")" << std::endl;
+
+
+			multiSetVertices2.push_back(singleSetVertices2);
+
+		}
+		
+		else if (identifier == "f") {
+			int a, b, c;
+			char d;
+
+			while ((ss >> a >> d >> b >> d >> c) && d == '/') {
+
+
+				//std::cout << "new position (" << a << ", " << b << ", " << c << ")" << std::endl;
+
+				modelTriangle.vertices[0] = multiSetVertices2[a - 1];						//a-1 since f starts at 1 but the multiSetVertices index starts at 0
+				modelTriangle.vertices[1] = multiSetVertices2[b - 1];
+				modelTriangle.vertices[2] = multiSetVertices2[c - 1];
+
+				rgbValues = colourMap["Red"];
+
+				rgbColour.red = 255;
+				rgbColour.green = 0;
+				rgbColour.blue = 0;
+
+				modelTriangle.colour = rgbColour;
+				modelTriangle.colour.name = "Red";
+				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
 				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
 
 				modelTriangles.push_back(modelTriangle);
@@ -124,8 +188,12 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 
 	}
 
+
+
+	MyReadFileSphere.close();
 	MyReadFile.close();
 	return modelTriangles;
+
 }
 
 glm::vec3 calcSurfaceNormal(ModelTriangle triangle) {

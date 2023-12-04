@@ -10,7 +10,9 @@ public:
 	glm::mat3 cameraOrientation;
 	float focalLength = 2.0;
 	float theta = 0.003;
-	glm::vec3 lightSource = { -0.4, 0.0, 0.4 };
+//	glm::vec3 lightSource = { 0.0, 0.5, 0.6 };
+	glm::vec3 lightSource = { 0.0, 0.0, 0.0 };			//specular lighting testing
+
 	bool lookAtToggle = false;
 	float scalingFactor = 160;
 	glm::mat3 rotationX = {

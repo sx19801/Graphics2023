@@ -16,16 +16,18 @@
 
 std::vector<float> interpolateSingleFloats(float from, float to, int numberOfValues);
 
-void resetDepthBuffer(DrawingWindow& window);
+void resetDepthBuffer(DrawingWindow& window, int**& zBuffer);
 
-void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow &window);
+void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow &window, int**& zBuffer);
 
-void drawStrokedTriangle(CanvasTriangle& triangle, Colour colour, DrawingWindow &window);
+void drawStrokedTriangle(CanvasTriangle& triangle, Colour colour, DrawingWindow &window, int**& zBuffer);
 
-void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow &window);
+void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow &window, int**& zBuffer);
 
 CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::mat3 cameraOrientation, glm::vec3 vertexPosition, float focalLength);
 
 std::vector<CanvasPoint> orderByIncrY(CanvasTriangle triangle);
+
+bool zDepthCheck(float x, float y, float z, int**& zBuffer);
 
 #endif // !TRIANGLE_H
