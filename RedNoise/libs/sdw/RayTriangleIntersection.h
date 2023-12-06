@@ -7,10 +7,14 @@
 struct RayTriangleIntersection {
 	glm::vec3 intersectionPoint;
 	float distanceFromPoints;
+	float totalDistFromLight;
 	ModelTriangle intersectedTriangle;
 	size_t triangleIndex;
 	bool valid = false;
+	bool shadowCheck = false;
 	bool shadow = false;
+	float u = 0;
+	float v = 0;
 
 
 	RayTriangleIntersection();

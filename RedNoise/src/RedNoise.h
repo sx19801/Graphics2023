@@ -1,6 +1,7 @@
 #ifndef REDNOISE_H
 #define REDNOISE_H
 
+
 #include <CanvasTriangle.h>
 #include <DrawingWindow.h>
 #include <Utils.h>

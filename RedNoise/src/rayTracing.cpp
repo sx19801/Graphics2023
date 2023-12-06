@@ -1,10 +1,12 @@
 #include "rayTracing.h"
 
 
-RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangles, glm::vec3 originalPoint, glm::vec3 rayDirection, int ignoreIndex, Camera& camera) {
+RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangles, glm::vec3 originalPoint, glm::vec3 rayDirection, int ignoreIndex, Camera& camera, bool& shadowCheck) {
 	float closestIntersectedPointT = 1000;
 	RayTriangleIntersection closestIntersection;
-
+	float t;
+	float u;
+	float v;
 	for (size_t i = 0; i < triangles.size(); i++) {
 
 		glm::vec3 e0 = triangles[i].vertices[1] - triangles[i].vertices[0];
@@ -13,9 +15,9 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 		glm::mat3 DEMatrix(-rayDirection, e0, e1);
 		glm::vec3 possibleSolution = glm::inverse(DEMatrix) * SPVector;
 
-		float t = possibleSolution[0];
-		float u = possibleSolution[1];
-		float v = possibleSolution[2];
+		t = possibleSolution[0];
+		u = possibleSolution[1];
+		v = possibleSolution[2];
 		//std::cout << t << " " << u << " " << v << '\n'; //all the u and vs are huge
 
 	//	std::cout << glm::to_string(triangle.normal) << '\n';
@@ -31,19 +33,23 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 				closestIntersection.valid = true;
 				closestIntersection.intersectedTriangle.normal = triangles[i].normal;
 				closestIntersectedPointT = t;
+				closestIntersection.u = u;
+				closestIntersection.v = v;
+
 				//std::cout << "i: " << i << " t: " << t << " distance from point to light source: " << closestIntersection.distanceFromPoints << " intersection point: " << glm::to_string(closestIntersection.intersectionPoint) << '\n';
 
 			}
 		}
+		if (shadowCheck == true) closestIntersection.totalDistFromLight = glm::distance(camera.lightSource, originalPoint);
 	
 	}
 
-	//CHECK FOR NO VALID INTERSECTIONS
-	if (closestIntersection.valid == false) {
+	if ((closestIntersectedPointT == 1000)) {
+		closestIntersection.shadow = false;
 		closestIntersection.intersectionPoint = originalPoint;
-		closestIntersection.distanceFromPoints = glm::distance(camera.lightSource, closestIntersection.intersectionPoint);
-		closestIntersection.valid = true;
 	}
+
+	//CHECK FOR SHADOWS
 
 	//std::cout << "shadow bool:   " << closestIntersection.shadow << '\n';
 	//closestIntersection.shadow = true;
@@ -58,6 +64,9 @@ glm::vec3 getTriangleIntersectionPointT(glm::vec3 originalPoint, glm::vec3 rayDi
 	return originalPoint + t * rayDirection;
 }
 
+glm::vec3 getTrianglePointUV(glm::vec3 startVertex ,glm::vec3 edge0, glm::vec3 edge1, float u, float v) {
+	return startVertex + (u * edge0) + (v * edge1);
+}
 
 glm::vec3 getPointInWorld(float u, float v, Camera& camera) {									
 	float x = (u - (float(WIDTH)) / 2) / (camera.scalingFactor * camera.focalLength);
@@ -111,4 +120,37 @@ glm::vec3 normalise(glm::vec3 vector) {
 	}
 	return normalisedVec;
 
+}
+
+std::array<glm::vec3, 3> calcVertexNormals(std::vector<ModelTriangle>& triangles, RayTriangleIntersection intersectedTriangle) {
+	std::array<glm::vec3, 3> vertexNormals;
+	std::vector<ModelTriangle> sharedTriangles;
+	//std::cout << triangles.size() << '\n';
+
+	//consider one vertex
+	for (size_t i = 0; i < 3; i++) { //check single vertex
+		for (size_t j = 0; j < triangles.size(); j++) { //loop through all triangles
+			for (size_t k = 0; k < 3; k++) { //loop through each vertex on triangle
+				if ((intersectedTriangle.intersectedTriangle.vertices[i] == triangles[j].vertices[k])) {
+					sharedTriangles.push_back(triangles[j]);
+				}
+			}
+		}
+		//std::cout << sharedTriangles.size() << '\n';
+		//average normal for vertex here
+		vertexNormals[i] = calcAverageNormal(sharedTriangles);
+		sharedTriangles = {};
+	}
+
+	return vertexNormals;
+}
+
+glm::vec3 calcAverageNormal(std::vector<ModelTriangle>& sharedTriangles) {
+	glm::vec3 averageNormal = {0,0,0};
+	for (size_t i = 0; i < sharedTriangles.size(); i++) {
+		averageNormal = sharedTriangles[i].normal + averageNormal;
+	}
+	averageNormal = averageNormal / sharedTriangles.size();
+	//std::cout << glm::to_string(averageNormal);
+	return averageNormal;
 }

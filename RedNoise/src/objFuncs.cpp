@@ -188,8 +188,6 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 
 	}
 
-
-
 	MyReadFileSphere.close();
 	MyReadFile.close();
 	return modelTriangles;

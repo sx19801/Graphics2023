@@ -1,106 +1,116 @@
 #include "RedNoise.h"
 
+
+
 void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera, int& lightType) {
 	Colour colour;
 	float pointToLightDist;
 	float distance2;
 	float intensity = 1;
-	float aoi = 1;
+	float aoi1 = 1;
+	float aoi2 = 1;
+	float aoi3 = 1;
+
 	float combine = 1;
-	float specular;
-	uint32_t colourUint32;
+	float specular = 0;
+	bool shadowCheck = false;
+	std::array<glm::vec3, 3> vertexNormals;
+	uint32_t colourUint32 = colourUint32 = (255 << 24) + (int(round(colour.red * combine)) << 16) + (int(round(colour.green * combine)) << 8) + int(round(colour.blue * combine));
 	glm::vec3 pointInSpace;
 	glm::vec3 directionVector;
 	RayTriangleIntersection closestValidIntersection;
 	glm::vec3 lightDirectionVector;
+	glm::vec3 lightDirectionVector1;
+	glm::vec3 lightDirectionVector2;
+	glm::vec3 lightDirectionVector3;
 	RayTriangleIntersection checkShadowIntersectionPoint;
 
 	for (size_t y = 0; y < HEIGHT; y++) {
 		for (size_t x = 0; x < WIDTH; x++) {
 			pointInSpace = getPointInWorld(x, y, camera);
 			directionVector = getDirectionVector(pointInSpace, camera.cameraPosition);
-			closestValidIntersection = getClosestValidIntersection(triangles, camera.cameraPosition, directionVector, -1, camera);
+			closestValidIntersection = getClosestValidIntersection(triangles, camera.cameraPosition, directionVector, -1, camera, shadowCheck);
 
 			if (closestValidIntersection.valid == true) {
 
 				colour = closestValidIntersection.intersectedTriangle.colour;
-
+				closestValidIntersection.shadowCheck = true;
 				lightDirectionVector = getDirectionVector(camera.lightSource, closestValidIntersection.intersectionPoint);
-				checkShadowIntersectionPoint = getClosestValidIntersection(triangles, closestValidIntersection.intersectionPoint, lightDirectionVector, closestValidIntersection.triangleIndex, camera);
-
+				checkShadowIntersectionPoint = getClosestValidIntersection(triangles, closestValidIntersection.intersectionPoint, lightDirectionVector, closestValidIntersection.triangleIndex, camera, closestValidIntersection.shadowCheck);
 
 				pointToLightDist = glm::distance(closestValidIntersection.intersectionPoint, camera.lightSource);
-				//	pointToLightDist = glm::length(closestValidIntersection.intersectionPoint, camera.lightSource);
 				distance2 = glm::distance(closestValidIntersection.intersectionPoint, checkShadowIntersectionPoint.intersectionPoint);
-
-				//hard shadows
-				
-					//colourUint32 = (255 << 24) + (int(round(colour.red * intensity)) << 16) + (int(round(colour.green * intensity)) << 8) + int(round(colour.blue * intensity));
-
+			
 				switch (lightType)
 				{
 				case 1:
 					intensity = proximityLightIntensity(pointToLightDist, intensity);
-					//intensity = intensity +0.2;
-					if (intensity > 1) intensity = 1;
 					colourUint32 = (255 << 24) + (int(round(colour.red * intensity)) << 16) + (int(round(colour.green * intensity)) << 8) + int(round(colour.blue * intensity));
 					break;
 
 				case 2:
-					aoi = angleOfIncidence(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal);
-					//std::cout << aoi << '\n';
-					if (aoi < 0.1) aoi = 0.1;
-					colourUint32 = (255 << 24) + (int(round(colour.red * aoi)) << 16) + (int(round(colour.green * aoi)) << 8) + int(round(colour.blue * aoi));
-					//std::cout << aoi << '\n';
+					aoi1 = angleOfIncidence(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal);
+					if (aoi1 < 0.1) aoi1 = 0.1;
+					colourUint32 = (255 << 24) + (int(round(colour.red * aoi1)) << 16) + (int(round(colour.green * aoi1)) << 8) + int(round(colour.blue * aoi1));
 					break;
 
-				case 3:			//specular
+				case 3:	
 					specular = specularLighting(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal, directionVector);
-					colourUint32 = (255 << 24) + (int(round(colour.red * specular)) << 16) + (int(round(colour.green * specular)) << 8) + int(round(colour.blue * specular));
+					colourUint32 = (255 << 24) + (int(round(255 * specular)) << 16) + (int(round(255 * specular)) << 8) + int(round(255 * specular));
 					break;
 
 				case 4:
 					intensity = proximityLightIntensity(pointToLightDist, intensity);
-					//intensity = intensity + 0.2;
-					//if (intensity > 1) intensity = 1;
-					//intensity += 0.2;
-					//if (intensity > 1) intensity = 1;
-					aoi = angleOfIncidence(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal);
-					if (aoi > 1 ) aoi = 1;
-					if (aoi < 0) aoi = 0;
+					aoi1 = angleOfIncidence(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal);
 					specular = specularLighting(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal, directionVector);
-					//if (specular < 0) specular = 0;
-					//specular = 0;
-				//	if (aoi < 0.2) aoi = 0.2;
-					combine = ((1.7*intensity*(aoi))) + specular + 0.13;
-					//if (combine < 0) combine = 0;
-
-					//if (combine < 0) std::cout << combine << '\n';
+					if (aoi1 > 1 ) aoi1 = 1;
+					if (aoi1 < 0.1) aoi1 = 0.1;
+					if (specular > 0.5) std::cout << specular << '\n';
+					specular = 255 * specular;
+					combine = (1.7*intensity*(aoi1))+0.2;
 					if (combine > 1) combine = 1;
 					if (combine < 0) combine = 0;
-					colourUint32 = (255 << 24) + (int(round(colour.red * combine)) << 16) + (int(round(colour.green * combine)) << 8) + int(round(colour.blue * combine));
+					colourUint32 = (255 << 24) + (int(std::clamp(round(colour.red * combine + specular),0.0f,255.0f)) << 16) + (int(std::clamp(round(colour.green * combine + specular), 0.0f, 255.0f)) << 8) + std::clamp(round(colour.blue * combine + specular), 0.0f, 255.0f);
+					break;
+
+				case 5: //GOURAUD
+					vertexNormals = gouraudShading(triangles, closestValidIntersection, camera);
+					lightDirectionVector1 = getDirectionVector(camera.lightSource, closestValidIntersection.intersectedTriangle.vertices[0]);
+					lightDirectionVector2 = getDirectionVector(camera.lightSource, closestValidIntersection.intersectedTriangle.vertices[1]);
+					lightDirectionVector3 = getDirectionVector(camera.lightSource, closestValidIntersection.intersectedTriangle.vertices[2]);
+					aoi1 = angleOfIncidence(lightDirectionVector1, vertexNormals[0]);
+					aoi2 = angleOfIncidence(lightDirectionVector2, vertexNormals[1]);
+					aoi3 = angleOfIncidence(lightDirectionVector3, vertexNormals[2]);
+					glm::vec3 colour1 = { int(round(colour.red * aoi1)),int(round(colour.green * aoi1)),int(round(colour.blue * aoi1)) };
+					glm::vec3 colour2 = { int(round(colour.red * aoi2)),int(round(colour.green * aoi2)),int(round(colour.blue * aoi2)) };
+					glm::vec3 colour3 = { int(round(colour.red * aoi3)),int(round(colour.green * aoi3)),int(round(colour.blue * aoi3)) };
+					
+					glm::vec3 edge0 = colour2 - colour1;
+					glm::vec3 edge1 = colour3 - colour1;
+					glm::vec3 colourOfPoint = getTrianglePointUV(colour1, edge0, edge1, closestValidIntersection.u, closestValidIntersection.v);
+					
+					colourUint32 = (255 << 24) + (int(round(colourOfPoint.r)) << 16) + (int(round(colourOfPoint.g * combine)) << 8) + int(round(colourOfPoint.b * combine));
+
 					break;
 				}
-				
-				if ((distance2 < pointToLightDist) && (distance2 > 0)) {
+			
+
+				if ((distance2 < pointToLightDist) && (distance2 > 0) && (lightType == 4)) { //SHADOWS
 					intensity = proximityLightIntensity(pointToLightDist, intensity);
-					aoi = angleOfIncidence(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal);
-					if (aoi > 1) aoi = 1;
-					//specular = specularLighting(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal, directionVector);
-					//if (specular < 0) specular = 0;
-					//specular = 0;
-				//	if (aoi < 0.2) aoi = 0.2;
-					combine = 1.9*(intensity/2*(aoi));
+					aoi1 = angleOfIncidence(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal);
+					if (aoi1 > 1) aoi1 = 1;
+					if (aoi1 < 0.1) aoi1 = 0.1;
+					combine = 1.9*(intensity/2*(aoi1))+0.15;
 					if (combine < 0.03) combine = 0.03;
 					if (combine > 1) combine = 1;
 
 					colourUint32 = (255 << 24) + (int(round(colour.red * combine)) << 16) + (int(round(colour.green * combine)) << 8) + int(round(colour.blue * combine));
 				}
-					//window.setPixelColour(x, y, colourUint32);
 				
-				//_sleep(50);
-				//window.renderFrame();
 				window.setPixelColour(x, y, colourUint32);
+			}
+			else { //NO VALID INTERSECTIONS 
+				window.setPixelColour(x, y, BLACK);
 			}
 		}
 	}
@@ -165,7 +175,7 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 }
 
 
-void drawRefLines(DrawingWindow& window) {	
+void drawRefLines(DrawingWindow& window, int**& zBuffer) {	
 	//drawLine(CanvasPoint(WIDTH / 2, 0), CanvasPoint(WIDTH / 2, 20), Colour(255, 0, 0), window);
 	//drawLine(CanvasPoint(WIDTH / 2, HEIGHT), CanvasPoint(WIDTH / 2, HEIGHT-20), Colour(255, 0, 0), window);
 	//drawLine(CanvasPoint(WIDTH / 4, 0), CanvasPoint(WIDTH / 4, 20), Colour(255, 0, 0), window);
@@ -178,12 +188,13 @@ void drawRefLines(DrawingWindow& window) {
 	//drawLine(CanvasPoint(WIDTH, 3 * HEIGHT / 4), CanvasPoint(WIDTH-20, (3 * HEIGHT / 4)), Colour(255, 0, 0), window);
 	//drawLine(CanvasPoint(WIDTH/4, HEIGHT), CanvasPoint(WIDTH/4, HEIGHT-20), Colour(255, 0, 0), window);
 	//drawLine(CanvasPoint(3*WIDTH/4, HEIGHT), CanvasPoint(3*WIDTH/4, (HEIGHT-20)), Colour(255, 0, 0), window);
-	//drawLine(CanvasPoint(0, HEIGHT / 2), CanvasPoint(WIDTH, HEIGHT / 2), Colour(255, 0, 0), window);
-	//drawLine(CanvasPoint(0, HEIGHT / 4), CanvasPoint(WIDTH, HEIGHT / 4), Colour(255, 0, 0), window);
-	//drawLine(CanvasPoint(0, 3 * HEIGHT / 4), CanvasPoint(WIDTH, (3 * HEIGHT / 4)), Colour(255, 0, 0), window);
-	//drawLine(CanvasPoint(WIDTH / 2, 0), CanvasPoint(WIDTH / 2, (HEIGHT)), Colour(255, 0, 0), window);
-	//drawLine(CanvasPoint(3 * WIDTH / 4, 0), CanvasPoint(3 * WIDTH / 4, HEIGHT), Colour(255, 0, 0), window);
-	//drawLine(CanvasPoint(WIDTH / 4, 0), CanvasPoint(WIDTH / 4, HEIGHT), Colour(255, 0, 0), window);
+
+	drawLine(CanvasPoint(0, HEIGHT / 2), CanvasPoint(WIDTH, HEIGHT / 2), Colour(255, 0, 0), window, zBuffer);
+	drawLine(CanvasPoint(0, HEIGHT / 4), CanvasPoint(WIDTH, HEIGHT / 4), Colour(255, 0, 0), window, zBuffer);
+	drawLine(CanvasPoint(0, 3 * HEIGHT / 4), CanvasPoint(WIDTH, (3 * HEIGHT / 4)), Colour(255, 0, 0), window, zBuffer);
+	drawLine(CanvasPoint(WIDTH / 2, 0), CanvasPoint(WIDTH / 2, (HEIGHT)), Colour(255, 0, 0), window, zBuffer);
+	drawLine(CanvasPoint(3 * WIDTH / 4, 0), CanvasPoint(3 * WIDTH / 4, HEIGHT), Colour(255, 0, 0), window, zBuffer);
+	drawLine(CanvasPoint(WIDTH / 4, 0), CanvasPoint(WIDTH / 4, HEIGHT), Colour(255, 0, 0), window, zBuffer);
 }
 
 
@@ -344,21 +355,25 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 			drawRayTracing(window, triangles, camera, lightType);
 
 		}
-		else if (event.key.keysym.sym == SDLK_6) {
+		else if (event.key.keysym.sym == SDLK_4) {
 			std::cout << "proximity" << '\n';
 			lightType = 1;
 		}
-		else if (event.key.keysym.sym == SDLK_7) {
+		else if (event.key.keysym.sym == SDLK_5) {
 			std::cout << "aoi" << '\n';
 			lightType = 2;
 		}
-		else if (event.key.keysym.sym == SDLK_8) {
+		else if (event.key.keysym.sym == SDLK_6) {
 			std::cout << "specular" << '\n';
 			lightType = 3;
 		}
-		else if (event.key.keysym.sym == SDLK_9) {
+		else if (event.key.keysym.sym == SDLK_7) {
 			std::cout << "combined" << '\n';
 			lightType = 4;
+		}
+		else if (event.key.keysym.sym == SDLK_8) {
+			std::cout << "gouraud" << '\n';
+			lightType = 5;
 			}
 		else if (event.key.keysym.sym == SDLK_p) {
 			std::cout << "delete zBuffer" << '\n';
@@ -381,8 +396,6 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 }
 
 
-
-
 int main(int argc, char* argv[]) {
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
@@ -391,7 +404,7 @@ int main(int argc, char* argv[]) {
 	Camera camera;
 	int renderType = 1;
 	int lightType = 1;
-	//drawRayTracing(window, triangles, camera);
+
 	std::vector<ModelTriangle>& triangles = loadGeoOBJ(scalingFactor);
 	
 	bool on = true;
@@ -401,9 +414,7 @@ int main(int argc, char* argv[]) {
 	int columns = WIDTH;
 	int** zBuffer = new int* [rows];
 	for (size_t i = 0; i < rows; ++i) zBuffer[i] = new int[columns];
-	resetDepthBuffer(window, zBuffer);
-	
-	//std::vector<std::vector<int>> zBuffer[WIDTH][HEIGHT] = {};
+	resetDepthBuffer(window, zBuffer); //INITIALISE EVERY ELEMENT ZBUFFER WITH 0
 	while (true) {
 		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType, lightType, zBuffer, on, triangles);
 
@@ -415,15 +426,9 @@ int main(int argc, char* argv[]) {
 		}
 		else if (renderType == 3) {
 			//drawRayTracing(window, triangles, camera, lightType);
-			//drawRefLines(window);
 		}
 
-		//draw(window, triangles, camera);
-		//drawRayTracing(window, triangles, camera);
-
-		drawRefLines(window);
+		//drawRefLines(window, zBuffer);
 		window.renderFrame();
-		//std::cout << "done";
 	}
-	//mem dealloc
 }

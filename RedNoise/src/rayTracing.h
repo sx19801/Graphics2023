@@ -8,7 +8,7 @@
 #include <CanvasPoint.h>
 #include "RedNoise.h"
 
-RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangle, glm::vec3 position, glm::vec3 direction, int ignoreIndex, Camera& camera);
+RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& triangle, glm::vec3 position, glm::vec3 direction, int ignoreIndex, Camera& camera, bool& shadowCheck);
 
 glm::vec3 directionVectorCalcs(Camera& camera);
 
@@ -18,6 +18,12 @@ glm::vec3 getDirectionVector(glm::vec3 vertexPositionTo, glm::vec3 vertexPositio
 
 glm::vec3 getTriangleIntersectionPointT(glm::vec3 cameraPosition, glm::vec3 rayDirection, float t);
 
+glm::vec3 getTrianglePointUV(glm::vec3 startVertex, glm::vec3 edge0, glm::vec3 edge1, float u, float v);
+
 glm::vec3 normalise(glm::vec3 vector);
+
+std::array<glm::vec3, 3> calcVertexNormals(std::vector<ModelTriangle>& triangles, RayTriangleIntersection intersectedTriangle);
+
+glm::vec3 calcAverageNormal(std::vector<ModelTriangle>& sharedTriangles);
 
 #endif // !RAYTRACING_H

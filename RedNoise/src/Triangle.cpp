@@ -1,6 +1,6 @@
 #include"Triangle.h"
 #include<Colour.h>
-#include<algorithm>
+
 #include <glm/ext.hpp>
 
 //#define WIDTH 960
