@@ -34,6 +34,7 @@ std::vector<CanvasPoint> interpolateSinglePoints(CanvasPoint from, CanvasPoint t
 	float totalZ;
 	float spacingZ;
 	int i = 0;
+	CanvasPoint newPoint;
 	std::vector<CanvasPoint> evenlySpacedVec;
 	totalX = to.x - from.x;
 	totalZ = to.depth - from.depth;
@@ -46,7 +47,7 @@ std::vector<CanvasPoint> interpolateSinglePoints(CanvasPoint from, CanvasPoint t
 	}
 
 	for (int i = 0; i <= numberOfValues; i++) {
-		CanvasPoint newPoint = { round(from.x) + spacingX * i, from.y, round(from.depth) + spacingZ * i };
+		newPoint = { round(from.x + spacingX * i), from.y, from.depth + spacingZ * i };
 		evenlySpacedVec.push_back(newPoint);
 	}
 
@@ -65,33 +66,28 @@ std::vector<CanvasPoint> orderByIncrY(CanvasTriangle triangle) {
 
 }
 
-bool zDepthCheck(float x, float y, float z, int**& zBuffer) {
-	/*if (zBuffer[int(x)][int(y)] == 0) {
-		zBuffer[int(x)][int(y)] = 1/z;
-		return true;
+void zDepthCheck(CanvasPoint xy, float z, std::vector<std::vector<float>>& zBuffer, Uint32 colourUint32, DrawingWindow& window) {
+	
+	if (zBuffer[xy.x][xy.y] == 0) {
+		zBuffer[xy.x][xy.y] = 1/z;
+		window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
 	}
 	else {
-		if (zBuffer[int(x)][int(y)] < 1/z) {
-			zBuffer[int(x)][int(y)] = 1/z;
-			return true;
+		if (zBuffer[xy.x][xy.y] > 1/z) {
+			zBuffer[xy.x][xy.y] = 1/z;
+			window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
 		}
 		else {
-			return false;
+			
 		}
-	}*/
-
-	
-		return true;
-	
-
+	}
 }
 
-void resetDepthBuffer(DrawingWindow& window, int**& zBuffer) {
+void resetDepthBuffer(DrawingWindow& window, std::vector<std::vector<float>>& zBuffer) {
 	window.clearPixels();
-	for (size_t i = 0; i < HEIGHT; i++) {
-		for (size_t j = 0; j < WIDTH; j++) {
-			zBuffer[i][j] = 0; 
-					
+	for (size_t i = 0; i < WIDTH; i++) {
+		for (size_t j = 0; j < HEIGHT; j++) {
+			zBuffer[i][j] = 0; 			
 		}
 	}
 }
@@ -103,7 +99,7 @@ bool compareOnScreen(float u, float v) {
 	else { return false; }
 }
 
-void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& window, int**& zBuffer) {
+void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& window, std::vector<std::vector<float>>& zBuffer) {
 	//if (!(colour.name == "Red" || colour.name == "Yellow")) return;
 	
 	float toX = (to.x);
@@ -146,13 +142,16 @@ void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& wi
 			xy.depth = from.depth + (zStepSize * i);
 
 			
+
+
 			//std::cout << "depth per step : " << xy.depth << " at i : "<< i <<  std::endl;
 			
 			if (compareOnScreen(xy.x, xy.y) == true){
-				if ((zDepthCheck(round(xy.x), round(xy.y), xy.depth, zBuffer) == true)) {
-					window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
+				zDepthCheck(xy,xy.depth, zBuffer, colourUint32, window);
+				
+				//window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
 					//window.renderFrame();
-				}
+				
 			}
 
 
@@ -170,15 +169,17 @@ void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& wi
 	}
 }
 
-void drawStrokedTriangle(CanvasTriangle& triangle, Colour colour, DrawingWindow& window, int**& zBuffer) {
+void drawStrokedTriangle(CanvasTriangle& triangle, Colour colour, DrawingWindow& window, std::vector<std::vector<float>>& zBuffer) {
 	drawLine(triangle.v0(), triangle.v1(), colour, window, zBuffer);
 	drawLine(triangle.v1(), triangle.v2(), colour, window, zBuffer);
 	drawLine(triangle.v2(), triangle.v0(), colour, window, zBuffer);
 	//std::cout << triangle.v0() << " " << triangle.v1() << " " << triangle.v2() << std::endl;
 }
 
-void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& window, int**& zBuffer) {
+void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& window, std::vector<std::vector<float>>& zBuffer) {
 	std::vector<CanvasPoint> incrYPoints = orderByIncrY(triangle);
+
+	
 	/*for (size_t i = 0; i < incrYPoints.size(); i++) {
 		std::cout << incrYPoints[0].y << " " << incrYPoints[1].y << " " << incrYPoints[2].y << std::endl;
 	}*/
@@ -218,6 +219,7 @@ void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& w
 	float changeInYTop = (incrYPoints[1].y - incrYPoints[0].y);
 	float changeInYBot = (incrYPoints[2].y - incrYPoints[1].y);
 
+
 	std::vector<CanvasPoint> topLeftArray = interpolateSinglePoints(incrYPoints[0], leftMidPoint, changeInYTop);
 	std::vector<CanvasPoint> topRightArray = interpolateSinglePoints(incrYPoints[0], rightMidPoint, changeInYTop);
 	std::vector<CanvasPoint> botLeftArray = interpolateSinglePoints(leftMidPoint, incrYPoints[2], changeInYBot);
@@ -230,6 +232,7 @@ void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& w
 		CanvasPoint lineEnd(round(topRightArray[i].x), (incrYPoints[0].y + i), topRightArray[i].depth);
 
 		drawLine(lineStart, lineEnd, colour, window, zBuffer);
+		//window.renderFrame();
 	}
 
 	for (size_t i = 0; i < changeInYBot; i++) {
@@ -239,6 +242,7 @@ void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& w
 		CanvasPoint lineEnd(round(botRightArray[i].x), (incrYPoints[1].y) + i, botRightArray[i].depth);
 
 		drawLine(lineStart, lineEnd, colour, window, zBuffer);
+		//window.renderFrame();
 	}
 }
 

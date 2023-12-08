@@ -14,7 +14,7 @@ glm::vec3 directionVectorCalcs(Camera& camera);
 
 glm::vec3 getPointInWorld(float u, float v, Camera& camera);
 
-glm::vec3 getDirectionVector(glm::vec3 vertexPositionTo, glm::vec3 vertexPositionFrom);
+glm::vec3 getDirectionVector(glm::vec3 vertexPositionFrom, glm::vec3 vertexPositionTo);
 
 glm::vec3 getTriangleIntersectionPointT(glm::vec3 cameraPosition, glm::vec3 rayDirection, float t);
 
@@ -22,7 +22,9 @@ glm::vec3 getTrianglePointUV(glm::vec3 startVertex, glm::vec3 edge0, glm::vec3 e
 
 glm::vec3 normalise(glm::vec3 vector);
 
-std::array<glm::vec3, 3> calcVertexNormals(std::vector<ModelTriangle>& triangles, RayTriangleIntersection intersectedTriangle);
+void calcVertexNormalsPhong(std::vector<ModelTriangle>& triangles, RayTriangleIntersection intersectedTriangle);
+
+void calcVertexNormals(std::vector<ModelTriangle>& triangles);
 
 glm::vec3 calcAverageNormal(std::vector<ModelTriangle>& sharedTriangles);
 

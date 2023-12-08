@@ -5,7 +5,7 @@
 #include"rayTracing.h"
 
 
-float proximityLightIntensity(float& pointToLight, float intensity);
+float proximityLightIntensity(float& pointToLight);
 
 float angleOfIncidence(glm::vec3 lightDirectionVector, glm::vec3 triangleNormal);
 

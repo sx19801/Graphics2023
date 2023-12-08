@@ -78,7 +78,7 @@ glm::vec3 getPointInWorld(float u, float v, Camera& camera) {
 }
 
 
-glm::vec3 getDirectionVector(glm::vec3 vertexPositionTo, glm::vec3 vertexPositionFrom) {		
+glm::vec3 getDirectionVector(glm::vec3 vertexPositionFrom, glm::vec3 vertexPositionTo) {		
 	glm::vec3 directionVector = normalise( vertexPositionTo - vertexPositionFrom);
 	return directionVector;
 }
@@ -122,27 +122,65 @@ glm::vec3 normalise(glm::vec3 vector) {
 
 }
 
-std::array<glm::vec3, 3> calcVertexNormals(std::vector<ModelTriangle>& triangles, RayTriangleIntersection intersectedTriangle) {
+void calcVertexNormalsPhong(std::vector<ModelTriangle>& triangles, RayTriangleIntersection intersectedTriangle) {
 	std::array<glm::vec3, 3> vertexNormals;
 	std::vector<ModelTriangle> sharedTriangles;
 	//std::cout << triangles.size() << '\n';
 
 	//consider one vertex
-	for (size_t i = 0; i < 3; i++) { //check single vertex
-		for (size_t j = 0; j < triangles.size(); j++) { //loop through all triangles
-			for (size_t k = 0; k < 3; k++) { //loop through each vertex on triangle
-				if ((intersectedTriangle.intersectedTriangle.vertices[i] == triangles[j].vertices[k])) {
-					sharedTriangles.push_back(triangles[j]);
+	//for (size_t i = 0; i < 3; i++) { //check single vertex
+	//	for (size_t j = 0; j < triangles.size(); j++) { //loop through all triangles
+	//		for (size_t k = 0; k < 3; k++) { //loop through each vertex on triangle
+	//			if ((intersectedTriangle.intersectedTriangle.vertices[i] == triangles[j].vertices[k])) {
+	//				sharedTriangles.push_back(triangles[j]);
+	//			}
+	//		}
+	//	}
+	//	//std::cout << sharedTriangles.size() << '\n';
+	//	//average normal for vertex here
+	//	vertexNormals[i] = calcAverageNormal(sharedTriangles);
+	//	sharedTriangles = {};
+	//}
+
+
+
+	for (size_t i = 0; i < triangles.size(); i++) {//loop through all triangles
+		for (size_t j = 0; j < 3; j++) {//loop through every vertex of a triangle
+			for (size_t k = 0; k < triangles.size(); k++) {//check if vertex is shared by other triangles
+				for (size_t l = 0; l < 3; l++) {//loop through every vertex of all triangles
+					if ((triangles[i].vertices[j] == triangles[k].vertices[l])) {
+						sharedTriangles.push_back(triangles[k]);
+					}
 				}
 			}
-		}
-		//std::cout << sharedTriangles.size() << '\n';
-		//average normal for vertex here
-		vertexNormals[i] = calcAverageNormal(sharedTriangles);
-		sharedTriangles = {};
-	}
 
-	return vertexNormals;
+			triangles[i].vertexNormals[j] = calcAverageNormal(sharedTriangles);//set triangle vertex normal to the average of all shared triangle normals
+			sharedTriangles = {};//reset shared triangles
+
+		}
+	}
+}
+
+void calcVertexNormals(std::vector<ModelTriangle>& triangles) {
+	
+	std::vector<ModelTriangle> sharedTriangles;
+	//std::cout << triangles.size() << '\n';
+
+	for (size_t i = 0; i < triangles.size(); i++) {//loop through all triangles
+		for (size_t j = 0; j < 3; j++) {//loop through every vertex of a triangle
+			for (size_t k = 0; k < triangles.size(); k++) {//check if vertex is shared by other triangles
+				for (size_t l = 0; l < 3; l++) {//loop through every vertex of all triangles
+					if ((triangles[i].vertices[j] == triangles[k].vertices[l])) {
+						sharedTriangles.push_back(triangles[k]);
+					}
+				}
+			}
+
+			triangles[i].vertexNormals[j] = calcAverageNormal(sharedTriangles);//set triangle vertex normal to the average of all shared triangle normals
+			sharedTriangles = {};//reset shared triangles
+
+		}
+	}
 }
 
 glm::vec3 calcAverageNormal(std::vector<ModelTriangle>& sharedTriangles) {

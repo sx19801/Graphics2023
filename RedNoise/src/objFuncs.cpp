@@ -123,7 +123,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
 				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
 
-				//modelTriangles.push_back(modelTriangle);
+				modelTriangles.push_back(modelTriangle);
 
 			}
 		}
@@ -181,7 +181,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
 				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
 
-				modelTriangles.push_back(modelTriangle);
+				//modelTriangles.push_back(modelTriangle);
 
 			}
 		}
