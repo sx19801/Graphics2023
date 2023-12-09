@@ -11,14 +11,18 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/normal.hpp>
 #include <glm/ext.hpp>
+#include "RedNoise.h"
 
 
 
 glm::vec3 convMtlToInt(glm::vec3 colourValues);
 
-std::unordered_map<std::string, glm::vec3> loadMatOBJ();
+std::unordered_map<std::string, glm::vec4> loadMatOBJ();
 
-std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor);
+std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window);
 
 glm::vec3 calcSurfaceNormal(ModelTriangle);
+
+CanvasTriangle convertModelTriToCanvas(ModelTriangle modelTriangle);
+
 #endif // !OBJFUNCS_H

@@ -12,8 +12,9 @@ glm::vec3 convMtlToInt(glm::vec3 colourValues) {
 	return RGBColours;
 }
 
-std::unordered_map<std::string, glm::vec3> loadMatOBJ() {
-	std::unordered_map<std::string, glm::vec3> colourMap;						//initialise global hashmap for colour
+std::unordered_map<std::string, glm::vec4> loadMatOBJ() {
+	std::unordered_map<std::string, glm::vec4> materialMap;						//initialise hashmap for colour
+
 	std::string myText;
 	std::ifstream MyReadFile("../../../OBJFiles/textured-cornell-box.mtl");
 	Colour colour;
@@ -32,7 +33,7 @@ std::unordered_map<std::string, glm::vec3> loadMatOBJ() {
 			std::string a;
 			ss >> a;
 			name = a;
-			colourMap[a] = {};
+			materialMap[a] = {};
 
 		}
 		else if (identifier == "Kd") {
@@ -41,17 +42,28 @@ std::unordered_map<std::string, glm::vec3> loadMatOBJ() {
 
 			glm::vec3 RGBColours = convMtlToInt({ a,b,c });
 
-			colourMap[name] = { RGBColours.r, RGBColours.g, RGBColours.b };
+			materialMap[name] = { RGBColours.r, RGBColours.g, RGBColours.b, 0.0f};
+			
+
+			//std::cout << "AAHHHHHHHHHH " << materialMap[name].r << " " << materialMap[name].g << " " << materialMap[name].b << " " << materialMap[name].w << " " << '\n';
+
+		}
+		else if (identifier == "map_Kd") {
+			std::string textureFileName;
+			ss >> textureFileName;
+
+			materialMap[name].w = 1.0f;
+
 
 		}
 
 	}
-	return colourMap;
+	return materialMap;
 }
 
 
 
-std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
+std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window) {
 	std::string myText;
 	std::ifstream MyReadFile("../../../OBJFiles/textured-cornell-box.obj");
 	std::ifstream MyReadFileSphere("../../../OBJFiles/sphere.obj");
@@ -62,15 +74,18 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 
 	glm::vec3 trianglePoints;
 	std::string colourNameGlobal;
-	glm::vec3 rgbValues;
+	glm::vec4 rgbValues;
 
+	std::vector<TexturePoint> textureUVCoords;
 	std::vector<glm::vec3> multiSetVertices;
 	glm::vec3 singleSetVertices;
 
-	std::unordered_map<std::string, glm::vec3> colourMap = loadMatOBJ();
+	std::unordered_map<std::string, glm::vec4> colourMap = loadMatOBJ();
 	
 	while (getline(MyReadFile, myText)) {
 		std::stringstream ss(myText);
+		std::stringstream ss2(myText);
+		std::stringstream ss3(myText);
 		std::string identifier;
 		ss >> identifier;
 
@@ -100,32 +115,71 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 		}
 
 		else if (identifier == "f") {
-			int a, b, c;
+			int a, b, c, h, i,j, k, l, m;
 			char d;
 
-			while ((ss >> a >> d >> b >> d >> c) && d == '/') {
+			std::string e, f, g;
 
+			ss >> e >> f >> g;
 
-				//std::cout << "new position (" << a << ", " << b << ", " << c << ")" << std::endl;
+			if (isdigit(g.back())) {
+				
+				while ((ss2 >> identifier >> a >> d >> b >> c >> d >> h >> i >> d >> j) && (d == '/')) {
+					modelTriangle.vertices[0] = multiSetVertices[a - 1];
+					modelTriangle.vertices[1] = multiSetVertices[c - 1];
+					modelTriangle.vertices[2] = multiSetVertices[i - 1];
 
-				modelTriangle.vertices[0] = multiSetVertices[a - 1];						//a-1 since f starts at 1 but the multiSetVertices index starts at 0
-				modelTriangle.vertices[1] = multiSetVertices[b - 1];
-				modelTriangle.vertices[2] = multiSetVertices[c - 1];
+					modelTriangle.texturePoints[0] = textureUVCoords[b-1];
+					modelTriangle.texturePoints[1] = textureUVCoords[h-1];
+					modelTriangle.texturePoints[2] = textureUVCoords[j-1];
 
-				rgbValues = colourMap[colourNameGlobal];
+					rgbValues = colourMap[colourNameGlobal];
 
-				rgbColour.red = rgbValues.r;
-				rgbColour.green = rgbValues.g;
-				rgbColour.blue = rgbValues.b;
+					rgbColour.red = rgbValues.r;
+					rgbColour.green = rgbValues.g;
+					rgbColour.blue = rgbValues.b;
 
-				modelTriangle.colour = rgbColour;
-				modelTriangle.colour.name = colourNameGlobal;
-				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
-				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
+					modelTriangle.colour = rgbColour;
+					modelTriangle.colour.name = colourNameGlobal;
+					modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
 
-				modelTriangles.push_back(modelTriangle);
-
+					modelTriangles.push_back(modelTriangle);
+				}
 			}
+			else {
+				//ss3 >> identifier >> k >> d >> l >> d >> m;
+				while ((ss3 >> identifier >> k >> d >> l >> d >> m) && d == '/') {
+
+
+					//std::cout << "new position (" << a << ", " << b << ", " << c << ")" << std::endl;
+
+					modelTriangle.vertices[0] = multiSetVertices[k - 1];						//a-1 since f starts at 1 but the multiSetVertices index starts at 0
+					modelTriangle.vertices[1] = multiSetVertices[l - 1];
+					modelTriangle.vertices[2] = multiSetVertices[m - 1];
+
+					rgbValues = colourMap[colourNameGlobal];
+
+					rgbColour.red = rgbValues.r;
+					rgbColour.green = rgbValues.g;
+					rgbColour.blue = rgbValues.b;
+
+					modelTriangle.colour = rgbColour;
+					modelTriangle.colour.name = colourNameGlobal;
+					modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
+					//std::cout << glm::to_string(modelTriangle.normal) << '\n';
+
+					modelTriangles.push_back(modelTriangle);
+
+				}
+			}
+		
+		}
+
+		else if (identifier == "vt") {
+			float a, b;
+			ss >> a >> b;
+			TexturePoint UV = {a,b};
+			textureUVCoords.push_back(UV);
 		}
 
 	}
@@ -188,6 +242,31 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 
 	}
 
+	for (size_t i = 0; i < modelTriangles.size(); i++) {
+		if (modelTriangles[i].colour.name == "Cobbles") {
+			CanvasTriangle triangle;
+			triangle.v0().texturePoint.x = modelTriangles[i].texturePoints[0].x;
+			triangle.v1().texturePoint.x = modelTriangles[i].texturePoints[1].x;
+			triangle.v2().texturePoint.x = modelTriangles[i].texturePoints[2].x;
+			triangle.v0().texturePoint.y = modelTriangles[i].texturePoints[0].y;
+			triangle.v1().texturePoint.y = modelTriangles[i].texturePoints[1].y;
+			triangle.v2().texturePoint.y = modelTriangles[i].texturePoints[2].y;
+
+
+			triangle.v0().x = modelTriangles[i].vertices[0].x;
+			triangle.v1().x = modelTriangles[i].vertices[1].x;
+			triangle.v2().x = modelTriangles[i].vertices[2].x;
+			triangle.v0().y = modelTriangles[i].vertices[0].y;
+			triangle.v1().y = modelTriangles[i].vertices[1].y;
+			triangle.v2().y = modelTriangles[i].vertices[2].y;
+			triangle.v0().depth = modelTriangles[i].vertices[0].z;
+			triangle.v1().depth = modelTriangles[i].vertices[1].z;
+			triangle.v2().depth = modelTriangles[i].vertices[2].z;
+
+			//loadTextureMap(triangle, window);
+		}
+	}
+
 	MyReadFileSphere.close();
 	MyReadFile.close();
 	return modelTriangles;
@@ -204,4 +283,27 @@ glm::vec3 calcSurfaceNormal(ModelTriangle triangle) {
 	//triangleNormal = normalise(triangleNormal);
 	//std::cout << "normal: " << glm::to_string(triangleNormal) << '\n';
 	return triangleNormal;
+}
+
+CanvasTriangle convertModelTriToCanvas(ModelTriangle modelTriangle) {
+	CanvasTriangle triangle;
+	triangle.v0().texturePoint.x = modelTriangle.texturePoints[0].x;
+	triangle.v1().texturePoint.x = modelTriangle.texturePoints[1].x;
+	triangle.v2().texturePoint.x = modelTriangle.texturePoints[2].x;
+	triangle.v0().texturePoint.y = modelTriangle.texturePoints[0].y;
+	triangle.v1().texturePoint.y = modelTriangle.texturePoints[1].y;
+	triangle.v2().texturePoint.y = modelTriangle.texturePoints[2].y;
+
+
+	triangle.v0().x = modelTriangle.vertices[0].x;
+	triangle.v1().x = modelTriangle.vertices[1].x;
+	triangle.v2().x = modelTriangle.vertices[2].x;
+	triangle.v0().y = modelTriangle.vertices[0].y;
+	triangle.v1().y = modelTriangle.vertices[1].y;
+	triangle.v2().y = modelTriangle.vertices[2].y;
+	triangle.v0().depth = modelTriangle.vertices[0].z;
+	triangle.v1().depth = modelTriangle.vertices[1].z;
+	triangle.v2().depth = modelTriangle.vertices[2].z;
+
+	return triangle;
 }

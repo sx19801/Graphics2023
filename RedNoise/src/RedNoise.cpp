@@ -264,45 +264,60 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 
 	
 
+
 	for (size_t i = 0; i < triangles.size(); i++) {
-		for (size_t j = 0; j < 3; j++) {
-			glm::vec3 vertexPosition = triangles[i].vertices[j];
+		/*if (!(triangles[i].colour.name == "Cobbles")) {*/
+			
+			for (size_t j = 0; j < 3; j++) {
+				glm::vec3 vertexPosition = triangles[i].vertices[j];
 
-			imagePlanePoint = getCanvasIntersectionPoint(camera.cameraPosition, camera.cameraOrientation, vertexPosition, camera.focalLength);
+				imagePlanePoint = getCanvasIntersectionPoint(camera.cameraPosition, camera.cameraOrientation, vertexPosition, camera.focalLength);
 
-			scaledImagePlanePoint.x = round(imagePlanePoint.x * scalingFactor) + (WIDTH / 2);
-			scaledImagePlanePoint.y = round(imagePlanePoint.y * scalingFactor) + (HEIGHT / 2);
+				scaledImagePlanePoint.x = round(imagePlanePoint.x * scalingFactor) + (WIDTH / 2);
+				scaledImagePlanePoint.y = round(imagePlanePoint.y * scalingFactor) + (HEIGHT / 2);
 
-			scaledImagePlanePoint.depth = imagePlanePoint.depth;
+				scaledImagePlanePoint.depth = imagePlanePoint.depth;
 
 
-			if (vertexPosition.z > maxZImagePlanePoint) {
-				maxZImagePlanePoint = vertexPosition.z;
+				if (vertexPosition.z > maxZImagePlanePoint) {
+					maxZImagePlanePoint = vertexPosition.z;
 
+				}
+				if (vertexPosition.z < minZImagePlanePoint) {
+					minZImagePlanePoint = vertexPosition.z;
+
+				}
+
+				// std::cout << scaledImagePlanePoint.x << " " << scaledImagePlanePoint.y << " " << std::endl;
+				canvasPointTriangle.vertices[j] = scaledImagePlanePoint;
+
+				if (triangles[i].colour.name == "Cobbles") {
+					canvasPointTriangle.v0().texturePoint = triangles[i].texturePoints[0];
+					canvasPointTriangle.v1().texturePoint = triangles[i].texturePoints[1];
+					canvasPointTriangle.v2().texturePoint = triangles[i].texturePoints[2];
+				
+				}
 			}
-			if (vertexPosition.z < minZImagePlanePoint) {
-				minZImagePlanePoint = vertexPosition.z;
 
+			
+			
+			//_sleep(800);
+
+			if (triangles[i].colour.name == "Cobbles") {
+				//CanvasTriangle triangle = convertModelTriToCanvas(triangles[i]);
+				loadTextureMap(canvasPointTriangle, window);
 			}
-
-			// std::cout << scaledImagePlanePoint.x << " " << scaledImagePlanePoint.y << " " << std::endl;
-			canvasPointTriangle.vertices[j] = scaledImagePlanePoint;
-		}
-
-		//_sleep(800);
-
-		if (triangles.size() == 1) {
-			drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window,zBuffer);
-		}
-
-		if (renderType == 2) {
-			drawStrokedTriangle(canvasPointTriangle, triangles[i].colour, window, zBuffer);
-		}
-		else if (renderType == 1) {
-			drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window, zBuffer);
-			//window.renderFrame();
-		}
-
+			else if (triangles.size() == 1) {
+				drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window,zBuffer);
+			}
+			else if (renderType == 2) {
+				drawStrokedTriangle(canvasPointTriangle, triangles[i].colour, window, zBuffer);
+			}
+			else if (renderType == 1) {
+				drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window, zBuffer);
+				//window.renderFrame();
+			}
+		//}
 	}
 }
 
@@ -384,7 +399,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 			//CanvasTriangle triangle(CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height));
 			//std::cout << triangle << '\n';
 			//drawFilledTriangle(triangle, Colour(rand() % 255, rand() % 255, rand() % 255), window);
-			std::vector<ModelTriangle>& triangles = loadGeoOBJ(1);
+			std::vector<ModelTriangle>& triangles = loadGeoOBJ(1, window);
 			std::vector<ModelTriangle> triangles2;
 			triangles2.push_back(triangles[26]);
 			//std::cout << "triangles size " << triangles.size() << std::endl;
@@ -536,7 +551,7 @@ int main(int argc, char* argv[]) {
 	int renderType = 1;
 	int lightType = 1;
 
-	std::vector<ModelTriangle>& triangles = loadGeoOBJ(scalingFactor);
+	std::vector<ModelTriangle>& triangles = loadGeoOBJ(scalingFactor, window);
 
 	bool on = true;
 
@@ -562,22 +577,22 @@ int main(int argc, char* argv[]) {
 
 	std::cout << A.texturePoint << " " << B.texturePoint << " " << C.texturePoint << '\n';
 	CanvasTriangle triangle = { A, B, C };
-	loadTextureMap(triangle, window);
+	//loadTextureMap(triangle, window);
 	//resetDepthBuffer(window, zBuffer); //INITIALISE EVERY ELEMENT ZBUFFER WITH 0
 	while (true) {
 		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType, lightType, zBuffer, on, triangles);
 
 		if (renderType == 1) {
-			//draw(window, triangles, camera, renderType, zBuffer);
+			draw(window, triangles, camera, renderType, zBuffer);
 		}
 		else if (renderType == 2) {
-			//draw(window, triangles, camera, renderType, zBuffer);
+			draw(window, triangles, camera, renderType, zBuffer);
 		}
 		else if (renderType == 3) {
 			//drawRayTracing(window, triangles, camera, lightType);
 		}
 
-		drawStrokedTriangle(triangle, WHITE, window, zBuffer);
+		//drawStrokedTriangle(triangle, WHITE, window, zBuffer);
 		
 
 		//drawRefLines(window, zBuffer);

@@ -37,15 +37,15 @@ void loadTextureMap(CanvasTriangle& triangle, DrawingWindow& window) {
 	CanvasPoint b = triangle.v1();
 	CanvasPoint c = triangle.v2();
 
-	std::cout << a.texturePoint << " " << b.texturePoint << " " << c.texturePoint << '\n';
-	std::cout << textureMap.height << " " << textureMap.width << '\n';
+	//std::cout << a.texturePoint << " " << b.texturePoint << " " << c.texturePoint << '\n';
+	//std::cout << textureMap.height << " " << textureMap.width << '\n';
 
 	int minX = std::min({ a.x,b.x,c.x });
 	int minY = std::min({ a.y, b.y, c.y });
 	int maxX = std::max({ a.x,b.x,c.x });
 	int maxY = std::max({ a.y, b.y, c.y });
 
-	std::cout << minX << " " << minY << " " << maxX << " " << maxY << '\n';
+	//std::cout << minX << " " << minY << " " << maxX << " " << maxY << '\n';
 	
 	//bounding box
 	Uint32 colourUint32 = (255 << 24) + (255 << 16) + (255 << 8) + 255;
@@ -61,7 +61,7 @@ void loadTextureMap(CanvasTriangle& triangle, DrawingWindow& window) {
 				//int u = round(a.x * bary.x + b.x * bary.y + c.x * bary.z);
 				//int v = round(a.y * bary.x + b.y * bary.y + c.y * bary.z);
 
-				std::cout << glm::to_string(bary) << '\n';
+				//std::cout << glm::to_string(bary) << '\n';
 
 				//std::cout << u << " " << v << '\n';
 				//window.setPixelColour(u, v, colourUint32);
@@ -72,11 +72,11 @@ void loadTextureMap(CanvasTriangle& triangle, DrawingWindow& window) {
 				Uint32 RGBInteger = textureMap.pixels[textureVectorIndex];
 
 				window.setPixelColour(x, y, RGBInteger);
-				window.renderFrame();
+				
 
 			}
 
 		}
 	}
-
+	//window.renderFrame();
 }
