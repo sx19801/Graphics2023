@@ -553,13 +553,17 @@ int main(int argc, char* argv[]) {
 	CanvasPoint B = { 300, 230 };
 	CanvasPoint C = { 10, 150 };
 
-	A.texturePoint = { 195,5 };
-	B.texturePoint = {395, 380};
-	C.texturePoint = {65, 330};
+	float widthTexture = 480;
+	float heightTexture = 395;
 
+	A.texturePoint = {float(195.0f/480.0f),float(5.0f/395.0f) };
+	B.texturePoint = {float(395.0f/480.0f), float(380.0f/395.0f)};
+	C.texturePoint = {float(65.0f/480.0f), float(330.0f/395.0f)};
+
+	std::cout << A.texturePoint << " " << B.texturePoint << " " << C.texturePoint << '\n';
 	CanvasTriangle triangle = { A, B, C };
-	loadTextureMap(triangle);
-	resetDepthBuffer(window, zBuffer); //INITIALISE EVERY ELEMENT ZBUFFER WITH 0
+	loadTextureMap(triangle, window);
+	//resetDepthBuffer(window, zBuffer); //INITIALISE EVERY ELEMENT ZBUFFER WITH 0
 	while (true) {
 		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType, lightType, zBuffer, on, triangles);
 
