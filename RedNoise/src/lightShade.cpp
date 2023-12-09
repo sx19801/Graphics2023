@@ -3,7 +3,8 @@
 
 
 float proximityLightIntensity(float& pointToLight) {
-	float intensity = (1 / (4 * M_PI * pow(pointToLight, 2)));
+	float intensity = (1 / (5*pointToLight* pow(pointToLight, 2)));
+	//std::cout << pointToLight << " ";
 	//glm::clamp(0.0f, 1.0f, intensity);
 	if (intensity > 1) {
 		intensity = 1;
@@ -14,6 +15,7 @@ float proximityLightIntensity(float& pointToLight) {
 float angleOfIncidence(glm::vec3 lightDirectionVector, glm::vec3 triangleNormal) {
 	float aoi = glm::dot(lightDirectionVector, triangleNormal);
 	//float aoi = glm::dot(triangleNormal, lightDirectionVector);
+	//if (aoi < 0) std::cout << aoi << '\n';
 	if (aoi < 0) aoi = 0;
 	if (aoi > 1) aoi = 1;
 	return aoi;
@@ -21,8 +23,9 @@ float angleOfIncidence(glm::vec3 lightDirectionVector, glm::vec3 triangleNormal)
 
 float specularLighting(glm::vec3 lightDirectionVector, glm::vec3 triangleNormal, glm::vec3 cameraToPoint) {
 	float specular;
-	int power =64;
+	int power =32;
 	glm::vec3 reflectionDirectionVector = lightDirectionVector - ((2 * triangleNormal) * (dot(lightDirectionVector, triangleNormal)));
+	reflectionDirectionVector = normalise(reflectionDirectionVector);
 	specular = pow(std::clamp(dot(cameraToPoint, reflectionDirectionVector), 0.0f,1.0f), power);
 	//if (specular < 0) specular = 0;
 	//specular = pow(specular, power);

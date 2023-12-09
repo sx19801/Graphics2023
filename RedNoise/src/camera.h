@@ -5,18 +5,21 @@
 class Camera
 {
 public:
-	glm::vec3 cameraPosition = { 0.0, 0.0, 4.0 }; 
-//	glm::vec3 cameraPosition = { -0.1, 0.5, 1.6 };//sphere
+	//glm::vec3 cameraPosition = {-2.721383, 0.000000, 2.931849};
+	glm::vec3 cameraPosition = { 0.0, 0.0, 4.0 };
+
+	//glm::vec3 cameraPosition = { -0.1, 0.5, 1.6 };//sphere
 
 	glm::vec3 lookAtPoint = { 0.0, 0.0, 0.0 };
+	//glm::mat3 cameraOrientation = { 0.732924, -0.000000, 0.680310, 0.000000, 1.000000, 0.000000, -0.680310, -0.000000, 0.732924 };
 	glm::mat3 cameraOrientation;
 	float focalLength = 2.0;
 	float theta = 0.003;
 //	glm::vec3 lightSource = { -0.3, 0.6, 1.1 };//specular lighting testing sphere
-//	glm::vec3 lightSource = { 0.5, 0.6, 0.5 };
+//	glm::vec3 lightSource = { 0.0, 0.6, 1.0 };
 //	glm::vec3 lightSource = { 0.2, 1.1, 0.7 };
 //	glm::vec3 lightSource = { 0.0,0.4,0.7 };
-	glm::vec3 lightSource = { 0.0,0.0,0.5 };
+	glm::vec3 lightSource = { 0.0,0.5,0.6 };
 
 	bool lookAtToggle = false;
 	float scalingFactor = 160;

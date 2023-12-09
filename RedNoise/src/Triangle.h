@@ -28,6 +28,8 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::mat3 camer
 
 std::vector<CanvasPoint> orderByIncrY(CanvasTriangle triangle);
 
+std::vector<CanvasPoint> orderByIncrX(CanvasTriangle triangle);
+
 void zDepthCheck(CanvasPoint xy, float z, std::vector<std::vector<float>>& zBuffer, Uint32 colourUint32, DrawingWindow& window);
 
 #endif // !TRIANGLE_H

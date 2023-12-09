@@ -12,6 +12,7 @@
 #include "objFuncs.h"
 #include "rayTracing.h"
 #include "lightShade.h"
+#include "textureMapping.h"
 
 //#define WIDTH 640
 //#define HEIGHT 480

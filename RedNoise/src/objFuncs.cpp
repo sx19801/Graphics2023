@@ -15,7 +15,7 @@ glm::vec3 convMtlToInt(glm::vec3 colourValues) {
 std::unordered_map<std::string, glm::vec3> loadMatOBJ() {
 	std::unordered_map<std::string, glm::vec3> colourMap;						//initialise global hashmap for colour
 	std::string myText;
-	std::ifstream MyReadFile("../../../OBJFiles/cornell-box.mtl");
+	std::ifstream MyReadFile("../../../OBJFiles/textured-cornell-box.mtl");
 	Colour colour;
 	std::string name;
 
@@ -53,7 +53,7 @@ std::unordered_map<std::string, glm::vec3> loadMatOBJ() {
 
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 	std::string myText;
-	std::ifstream MyReadFile("../../../OBJFiles/cornell-box.obj");
+	std::ifstream MyReadFile("../../../OBJFiles/textured-cornell-box.obj");
 	std::ifstream MyReadFileSphere("../../../OBJFiles/sphere.obj");
 
 	Colour rgbColour;
@@ -181,7 +181,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor) {
 				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
 				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
 
-				//modelTriangles.push_back(modelTriangle);
+				modelTriangles.push_back(modelTriangle);
 
 			}
 		}
