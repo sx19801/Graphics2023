@@ -81,13 +81,13 @@ std::vector<CanvasPoint> orderByIncrX(CanvasTriangle triangle) {
 void zDepthCheck(CanvasPoint xy, float z, std::vector<std::vector<float>>& zBuffer, Uint32 colourUint32, DrawingWindow& window) {
 	
 	if (zBuffer[xy.x][xy.y] == 0) {
-		zBuffer[xy.x][xy.y] = z;
+		zBuffer[xy.x][xy.y] = 1/z;
 		window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
 		//window.renderFrame();
 	}
 	else {
-		if (zBuffer[xy.x][xy.y] < z) {
-			zBuffer[xy.x][xy.y] = z;
+		if (zBuffer[xy.x][xy.y] > 1/z) {
+			zBuffer[xy.x][xy.y] = 1/z;
 			window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
 			//window.renderFrame();
 		}
@@ -149,7 +149,7 @@ void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& wi
 		xy.depth = fromZ;
 	}
 	else {
-		for (size_t i = 0; i <= numberOfSteps; i++) {
+		for (size_t i = 0; i <= numberOfSteps+1; i++) {
 			
 			
 			xy.x = from.x + (xStepSize * i);

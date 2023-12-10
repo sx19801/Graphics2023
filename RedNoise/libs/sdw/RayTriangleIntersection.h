@@ -15,6 +15,7 @@ struct RayTriangleIntersection {
 	bool shadow = false;
 	float u = 0;
 	float v = 0;
+	float t = 0;
 
 
 	RayTriangleIntersection();

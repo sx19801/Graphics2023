@@ -26,7 +26,7 @@ int getTextureVectorIndex(float u, float v) {
 }
 
 
-void loadTextureMap(CanvasTriangle& triangle, DrawingWindow& window) {
+void loadTextureMap(CanvasTriangle& triangle, DrawingWindow& window, std::vector<std::vector<float>>& zBuffer) {
 	TextureMap textureMap = TextureMap("../../../OBJFiles/texture.ppm");
 	
 	//for (size_t i = 0; i < TextureMap("../../../OBJFiles/texture.ppm").pixels.size(); i++) std::cout << TextureMap("../../../OBJFiles/texture.ppm").pixels.size() << '\n';
@@ -58,6 +58,8 @@ void loadTextureMap(CanvasTriangle& triangle, DrawingWindow& window) {
 				//pixel inside triangle 
 				float u = (a.texturePoint.x * bary.x + b.texturePoint.x * bary.y + c.texturePoint.x * bary.z);
 				float v = (a.texturePoint.y * bary.x + b.texturePoint.y * bary.y + c.texturePoint.y * bary.z);
+
+				float z = a.depth * bary.x + b.depth * bary.y + c.depth * bary.z;
 				//int u = round(a.x * bary.x + b.x * bary.y + c.x * bary.z);
 				//int v = round(a.y * bary.x + b.y * bary.y + c.y * bary.z);
 
@@ -70,9 +72,14 @@ void loadTextureMap(CanvasTriangle& triangle, DrawingWindow& window) {
 				int textureVectorIndex = textureXYToVectorLocation(CanvasPoint(u, v), textureMap.width, textureMap.height);
 				//std::cout << textureVectorIndex << '\n';
 				Uint32 RGBInteger = textureMap.pixels[textureVectorIndex];
-
-				window.setPixelColour(x, y, RGBInteger);
 				
+
+				if (!((x < 0) || (x >= window.width) || (y < 0) || (y >= window.height))) {
+					
+					//window.setPixelColour(x, y, RGBInteger);
+					zDepthCheck(XY,z, zBuffer, RGBInteger, window);
+				}
+
 
 			}
 

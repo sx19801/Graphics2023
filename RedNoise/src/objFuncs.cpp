@@ -235,7 +235,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
 				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
 
-				modelTriangles.push_back(modelTriangle);
+				//modelTriangles.push_back(modelTriangle);
 
 			}
 		}
@@ -304,6 +304,7 @@ CanvasTriangle convertModelTriToCanvas(ModelTriangle modelTriangle) {
 	triangle.v0().depth = modelTriangle.vertices[0].z;
 	triangle.v1().depth = modelTriangle.vertices[1].z;
 	triangle.v2().depth = modelTriangle.vertices[2].z;
+
 
 	return triangle;
 }

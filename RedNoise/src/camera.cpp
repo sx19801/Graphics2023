@@ -77,4 +77,5 @@ void Camera::lookAt(Camera& camera, glm::vec3 lookAtPoint) {
 		-forward,
 	};
 
+	 camera.lookAtToggle = false;
 }

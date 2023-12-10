@@ -34,6 +34,12 @@ float specularLighting(glm::vec3 lightDirectionVector, glm::vec3 triangleNormal,
 	return specular;
 }
 
+glm::vec3 vectorOfReflection(glm::vec3 lightDirectionVector, glm::vec3 triangleNormal) {
+	glm::vec3 reflectionVector = lightDirectionVector - (2 * triangleNormal * dot(lightDirectionVector, triangleNormal));
+	//reflectionVector = normalise(reflectionVector);
+	return reflectionVector;
+}
+
 std::array<glm::vec3, 3> gouraudShading(std::vector<ModelTriangle>& triangles, RayTriangleIntersection intersectedTriangle, Camera& camera) {
 
 	return intersectedTriangle.intersectedTriangle.vertexNormals;

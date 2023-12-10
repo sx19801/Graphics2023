@@ -17,7 +17,7 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 	float specular2 = 0;
 	float specular3 = 0;
 	float proximity = 0;
-	float ambient = 0.11;
+	float ambient = 0.04;
 	float colourOfVertex0;
 	float colourOfVertex1;
 	float colourOfVertex2;
@@ -54,6 +54,9 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 	glm::vec3 lightDirectionVectorAOI2;
 	glm::vec3 lightDirectionVectorAOI3;
 	RayTriangleIntersection checkShadowIntersectionPoint;
+	glm::vec3 pointNormal;
+
+	int i = 0;
 
 	calcVertexNormals(triangles);
 
@@ -69,6 +72,7 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 				colour.g = closestValidIntersection.intersectedTriangle.colour.green;
 				colour.b = closestValidIntersection.intersectedTriangle.colour.blue;
 
+
 				//directionVector = getDirectionVector(camera.cameraPosition, pointInSpace);
 				closestValidIntersection.shadowCheck = true;
 				lightDirectionVector = getDirectionVector(closestValidIntersection.intersectionPoint, camera.lightSource);
@@ -77,6 +81,7 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 				pointToLightDist = glm::distance(closestValidIntersection.intersectionPoint, camera.lightSource);
 				distance2 = glm::distance(closestValidIntersection.intersectionPoint, checkShadowIntersectionPoint.intersectionPoint);
 			
+
 				switch (lightType)
 				{
 				case 1:
@@ -173,15 +178,15 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 					break;
 
 				case 6://Phong
-					if (closestValidIntersection.intersectedTriangle.colour.name == "Grey") {
-						std::cout << "yo" << '\n';
-					}
 					glm::vec3 point1 = (1 - closestValidIntersection.u - closestValidIntersection.v) * closestValidIntersection.intersectedTriangle.vertexNormals[0];
 					glm::vec3 point2 = closestValidIntersection.u * closestValidIntersection.intersectedTriangle.vertexNormals[1];
 					glm::vec3 point3 = closestValidIntersection.v * closestValidIntersection.intersectedTriangle.vertexNormals[2];
 
-					glm::vec3 pointNormal = point1 + point2 + point3;
+					pointNormal = point1 + point2 + point3;
+					pointNormal = normalise(pointNormal);
+					
 
+					
 					aoi1 = angleOfIncidence(lightDirectionVector, pointNormal);
 
 					directionVector2 = getDirectionVector(closestValidIntersection.intersectionPoint, camera.cameraPosition);
@@ -192,21 +197,59 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 					
 					intensity = proximityLightIntensity(pointToLightDist);
 					//combine = (1.7 * intensity * (aoi1));
-					ambient = 0;
+					ambient = 0.08;
 					//colourUint32 = (255 << 24) + (int(std::clamp(round((colour.red * combine) + specular), 0.0f, 255.0f)) << 16) + (int(std::clamp(round((colour.green * combine) + specular), 0.0f, 255.0f)) << 8) + std::clamp(round((colour.blue * combine) + specular), 0.0f, 255.0f);
 
 
 					break;
 
 				}
-			
-
 
 
 				//combine = aoi1*0.2+ambient*0.2+intensity*5;
 				//combine = 4 * intensity* (aoi1) + aoi1*0.4 + ambient ;
 				//std::cout << combine << '\n';
-				if ((distance2 < pointToLightDist) && (distance2 > 0) && (lightType == 1)) { //SHADOWS
+
+				//REFLECTIVE
+				if (closestValidIntersection.intersectedTriangle.colour.name == "Grey") { //reflective blue box
+					glm::vec3 point1 = (1 - closestValidIntersection.u - closestValidIntersection.v) * closestValidIntersection.intersectedTriangle.vertexNormals[0];
+					glm::vec3 point2 = closestValidIntersection.u * closestValidIntersection.intersectedTriangle.vertexNormals[1];
+					glm::vec3 point3 = closestValidIntersection.v * closestValidIntersection.intersectedTriangle.vertexNormals[2];
+
+					pointNormal = point1 + point2 + point3;
+					pointNormal = normalise(pointNormal);
+					pointNormal = closestValidIntersection.intersectedTriangle.normal;
+					glm::vec3 viewDirectionVectorToPoint = getDirectionVector(camera.cameraPosition, closestValidIntersection.intersectionPoint);
+					glm::vec3 reflectionDirectionVector = vectorOfReflection(viewDirectionVectorToPoint, pointNormal);
+					reflectionDirectionVector = normalise(reflectionDirectionVector);
+					std::vector<ModelTriangle> triangle;
+
+					//triangle.push_back(closestValidIntersection.intersectedTriangle);
+					RayTriangleIntersection reflectedIntersection = getClosestValidIntersection(triangles, closestValidIntersection.intersectionPoint, reflectionDirectionVector, closestValidIntersection.triangleIndex, camera, shadowCheck);
+					
+					if (reflectedIntersection.valid == false && reflectedIntersection.intersectedTriangle.colour.name == "Magenta") {
+						colour.r = (reflectedIntersection.intersectedTriangle.colour.red);
+						colour.g = (reflectedIntersection.intersectedTriangle.colour.green);
+						colour.b = (reflectedIntersection.intersectedTriangle.colour.blue);
+
+						std::cout << closestValidIntersection.intersectedTriangle.colour.name << '\n';
+					}
+					else {
+						combine = 1;
+						colour.r = (reflectedIntersection.intersectedTriangle.colour.red *combine);
+						colour.g = (reflectedIntersection.intersectedTriangle.colour.green * combine);
+						colour.b = (reflectedIntersection.intersectedTriangle.colour.blue * combine);
+					}
+					i++;
+
+				}
+				
+				//TEXTURE
+
+
+
+				//SHADOWS
+				if ((distance2 < pointToLightDist) && (distance2 > 0) ) { //SHADOWS
 					/*intensity = proximityLightIntensity(pointToLightDist, intensity);
 					aoi1 = angleOfIncidence(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal);
 					if (aoi1 > 1) aoi1 = 1;
@@ -215,25 +258,28 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 					if (combine < 0.03) combine = 0.03;
 					if (combine > 1) combine = 1;*/
 					
-					
 					intensity = 0;
 					aoi1 = 0;
 					specular = 0;
-					ambient = 0.11;
+					ambient = 0.08;
+					
 					//combine = 0.2;
 					//specular = 0;
 				}
-
-			
-				//combine = aoi1*intensity + intensity;
+				
 				combine = ((intensity)) + (aoi1*(intensity/2)) + ambient;
 				if (combine > 1) combine = 1;
 				if (combine < 0) combine = 0;
+				//combine = aoi1*intensity + intensity;
 
 				//specular = specular * 0.7;
 
+				int colourR = int(std::clamp(round((colour.r * combine) + specular), 0.0f, 255.0f));
+				int colourG = int(std::clamp(round((colour.g * combine) + specular), 0.0f, 255.0f));
+				int colourB = int(std::clamp(round((colour.b * combine) + specular), 0.0f, 255.0f));
+
 				//if (combine < 0.1) combine = 0.1;
-				colourUint32 = (255 << 24) + (int(std::clamp(round((colour.r * combine) + specular), 0.0f, 255.0f)) << 16) + (int(std::clamp(round((colour.g * combine) + specular), 0.0f, 255.0f)) << 8) + std::clamp(round((colour.b * combine) + specular), 0.0f, 255.0f);
+				colourUint32 = (255 << 24) + (colourR << 16) + (colourG << 8) + colourB;
 				
 				if (lightType == 5) {
 					colourUint32 = (255 << 24) + (int(combine1) << 16) + (int(combine2) << 8) + int(combine3);
@@ -295,6 +341,7 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 					canvasPointTriangle.v0().texturePoint = triangles[i].texturePoints[0];
 					canvasPointTriangle.v1().texturePoint = triangles[i].texturePoints[1];
 					canvasPointTriangle.v2().texturePoint = triangles[i].texturePoints[2];
+					
 				
 				}
 			}
@@ -305,7 +352,7 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 
 			if (triangles[i].colour.name == "Cobbles") {
 				//CanvasTriangle triangle = convertModelTriToCanvas(triangles[i]);
-				loadTextureMap(canvasPointTriangle, window);
+				loadTextureMap(canvasPointTriangle, window, zBuffer);
 			}
 			else if (triangles.size() == 1) {
 				drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window,zBuffer);
@@ -533,8 +580,11 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 
 	}
 	else if (event.type == SDL_MOUSEBUTTONDOWN) {
-		window.savePPM("output.ppm");
-		window.saveBMP("output.bmp");
+		/*window.savePPM("output.ppm");
+		window.saveBMP("output.bmp");*/
+		int x, y;
+		SDL_GetMouseState(&x, &y);
+		std::cout << x << " " << y << '\n';
 	}
 	else {
 		//std::cout << mouseX << "'" << mouseY << '\n';

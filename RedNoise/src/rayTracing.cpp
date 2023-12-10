@@ -7,6 +7,7 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 	float t;
 	float u;
 	float v;
+	closestIntersection.t = -1;
 	for (size_t i = 0; i < triangles.size(); i++) {
 
 		glm::vec3 e0 = triangles[i].vertices[1] - triangles[i].vertices[0];
@@ -33,11 +34,18 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 				closestIntersection.valid = true;
 				closestIntersection.intersectedTriangle.normal = triangles[i].normal;
 				closestIntersectedPointT = t;
+				closestIntersection.t = t;
 				closestIntersection.u = u;
 				closestIntersection.v = v;
-
+				//if (t < 0.2) std::cout << t << '\n';
 				//std::cout << "i: " << i << " t: " << t << " distance from point to light source: " << closestIntersection.distanceFromPoints << " intersection point: " << glm::to_string(closestIntersection.intersectionPoint) << '\n';
 
+			}
+			else if ((t > 0 && t <= 0.015) && i != ignoreIndex) {
+				closestIntersection.t = 66;
+				closestIntersection.intersectedTriangle.colour.name = triangles[i].colour.name;
+				closestIntersection.intersectedTriangle.colour = triangles[i].colour;
+				
 			}
 		}
 		if (shadowCheck == true) closestIntersection.totalDistFromLight = glm::distance(camera.lightSource, originalPoint);
@@ -47,7 +55,11 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 	if ((closestIntersectedPointT == 1000)) {
 		closestIntersection.shadow = false;
 		closestIntersection.intersectionPoint = originalPoint;
+		closestIntersection.valid = false;
+		closestIntersection.t = 1000;
 	}
+
+	
 
 	//CHECK FOR SHADOWS
 
@@ -166,21 +178,26 @@ void calcVertexNormals(std::vector<ModelTriangle>& triangles) {
 	std::vector<ModelTriangle> sharedTriangles;
 	//std::cout << triangles.size() << '\n';
 
-	for (size_t i = 0; i < triangles.size(); i++) {//loop through all triangles
-		for (size_t j = 0; j < 3; j++) {//loop through every vertex of a triangle
-			for (size_t k = 0; k < triangles.size(); k++) {//check if vertex is shared by other triangles
-				for (size_t l = 0; l < 3; l++) {//loop through every vertex of all triangles
-					if ((triangles[i].vertices[j] == triangles[k].vertices[l])) {
-						sharedTriangles.push_back(triangles[k]);
+
+	
+		for (size_t i = 0; i < triangles.size(); i++) {//loop through all triangles
+			
+				for (size_t j = 0; j < 3; j++) {//loop through every vertex of a triangle
+					for (size_t k = 0; k < triangles.size(); k++) {//check if vertex is shared by other triangles
+						for (size_t l = 0; l < 3; l++) {//loop through every vertex of all triangles
+							if ((triangles[i].vertices[j] == triangles[k].vertices[l])) {
+								sharedTriangles.push_back(triangles[k]);
+							}
+						}
 					}
+
+					triangles[i].vertexNormals[j] = calcAverageNormal(sharedTriangles);//set triangle vertex normal to the average of all shared triangle normals
+					sharedTriangles = {};//reset shared triangles
+
 				}
-			}
-
-			triangles[i].vertexNormals[j] = calcAverageNormal(sharedTriangles);//set triangle vertex normal to the average of all shared triangle normals
-			sharedTriangles = {};//reset shared triangles
-
+		
 		}
-	}
+	
 }
 
 glm::vec3 calcAverageNormal(std::vector<ModelTriangle>& sharedTriangles) {
