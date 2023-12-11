@@ -197,7 +197,7 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 					
 					intensity = proximityLightIntensity(pointToLightDist);
 					//combine = (1.7 * intensity * (aoi1));
-					ambient = 0.08;
+					ambient = 0.06;
 					//colourUint32 = (255 << 24) + (int(std::clamp(round((colour.red * combine) + specular), 0.0f, 255.0f)) << 16) + (int(std::clamp(round((colour.green * combine) + specular), 0.0f, 255.0f)) << 8) + std::clamp(round((colour.blue * combine) + specular), 0.0f, 255.0f);
 
 
@@ -232,10 +232,11 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 						colour.g = (reflectedIntersection.intersectedTriangle.colour.green);
 						colour.b = (reflectedIntersection.intersectedTriangle.colour.blue);
 
-						std::cout << closestValidIntersection.intersectedTriangle.colour.name << '\n';
+						//std::cout << closestValidIntersection.intersectedTriangle.colour.name << '\n';
 					}
 					else {
-						combine = 1;
+						combine = ((intensity)) + (aoi1 * (intensity /2)) + ambient;
+						//combine = 1;
 						colour.r = (reflectedIntersection.intersectedTriangle.colour.red *combine);
 						colour.g = (reflectedIntersection.intersectedTriangle.colour.green * combine);
 						colour.b = (reflectedIntersection.intersectedTriangle.colour.blue * combine);
@@ -261,13 +262,16 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 					intensity = 0;
 					aoi1 = 0;
 					specular = 0;
-					ambient = 0.08;
+					ambient = 0.07;
 					
 					//combine = 0.2;
 					//specular = 0;
 				}
 				
-				combine = ((intensity)) + (aoi1*(intensity/2)) + ambient;
+//				combine = ((intensity)) + (aoi1*(intensity*0.83)) + ambient;
+				combine = ((intensity)) + (aoi1 * (intensity)) + ambient;
+
+				
 				if (combine > 1) combine = 1;
 				if (combine < 0) combine = 0;
 				//combine = aoi1*intensity + intensity;
@@ -295,7 +299,7 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 
 
 void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera, int& renderType, std::vector<std::vector<float>>& zBuffer) {
-	resetDepthBuffer(window, zBuffer);
+//	resetDepthBuffer(window, zBuffer);
 	if (camera.lookAtToggle == true) {
 		camera.orbit(camera, camera.theta);
 		camera.lookAt(camera, camera.lookAtPoint);
@@ -317,12 +321,16 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 			for (size_t j = 0; j < 3; j++) {
 				glm::vec3 vertexPosition = triangles[i].vertices[j];
 
+				if (triangles[i].colour.name == "White") {
+					vertexPosition.y = vertexPosition.y - 0.02;
+				}
 				imagePlanePoint = getCanvasIntersectionPoint(camera.cameraPosition, camera.cameraOrientation, vertexPosition, camera.focalLength);
 
 				scaledImagePlanePoint.x = round(imagePlanePoint.x * scalingFactor) + (WIDTH / 2);
 				scaledImagePlanePoint.y = round(imagePlanePoint.y * scalingFactor) + (HEIGHT / 2);
 
 				scaledImagePlanePoint.depth = imagePlanePoint.depth;
+
 
 
 				if (vertexPosition.z > maxZImagePlanePoint) {
@@ -361,6 +369,7 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 				drawStrokedTriangle(canvasPointTriangle, triangles[i].colour, window, zBuffer);
 			}
 			else if (renderType == 1) {
+			//	std::cout << "yo" << '\n';
 				drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window, zBuffer);
 				//window.renderFrame();
 			}
@@ -546,6 +555,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 		else if (event.key.keysym.sym == SDLK_3) {
 			std::cout << "raytrace" << '\n';
 			renderType = 3;
+			resetDepthBuffer(window, zBuffer);
 			drawRayTracing(window, triangles, camera, lightType);
 
 		}
@@ -584,6 +594,8 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 		window.saveBMP("output.bmp");*/
 		int x, y;
 		SDL_GetMouseState(&x, &y);
+		window.setPixelColour(x, y, RED);
+		window.renderFrame();
 		std::cout << x << " " << y << '\n';
 	}
 	else {
@@ -629,7 +641,10 @@ int main(int argc, char* argv[]) {
 	CanvasTriangle triangle = { A, B, C };
 	//loadTextureMap(triangle, window);
 	//resetDepthBuffer(window, zBuffer); //INITIALISE EVERY ELEMENT ZBUFFER WITH 0
+	//draw(window, triangles, camera, renderType, zBuffer);
+	//drawRayTracing(window, triangles, camera, lightType);
 	while (true) {
+	//	resetDepthBuffer(window, zBuffer);
 		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType, lightType, zBuffer, on, triangles);
 
 		if (renderType == 1) {
@@ -639,13 +654,13 @@ int main(int argc, char* argv[]) {
 			draw(window, triangles, camera, renderType, zBuffer);
 		}
 		else if (renderType == 3) {
-			//drawRayTracing(window, triangles, camera, lightType);
+		//	drawRayTracing(window, triangles, camera, lightType);
 		}
 
 		//drawStrokedTriangle(triangle, WHITE, window, zBuffer);
-		
 
 		//drawRefLines(window, zBuffer);
 		window.renderFrame();
+		//std::cout << "yo " << '\n';
 	}
 }

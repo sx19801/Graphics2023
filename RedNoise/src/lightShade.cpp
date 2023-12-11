@@ -23,7 +23,7 @@ float angleOfIncidence(glm::vec3 lightDirectionVector, glm::vec3 triangleNormal)
 
 float specularLighting(glm::vec3 lightDirectionVector, glm::vec3 triangleNormal, glm::vec3 cameraToPoint) {
 	float specular;
-	int power =32;
+	int power =64;
 	glm::vec3 reflectionDirectionVector = lightDirectionVector - ((2 * triangleNormal) * (dot(lightDirectionVector, triangleNormal)));
 	reflectionDirectionVector = normalise(reflectionDirectionVector);
 	specular = pow(std::clamp(dot(cameraToPoint, reflectionDirectionVector), 0.0f,1.0f), power);

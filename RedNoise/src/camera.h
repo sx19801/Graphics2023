@@ -5,7 +5,7 @@
 class Camera
 {
 public:
-	//glm::vec3 cameraPosition = {-2.721383, 0.000000, 2.931849};
+//	glm::vec3 cameraPosition = {-2.721383, 0.000000, 2.931849};
 	glm::vec3 cameraPosition = { 0.0, 0.0, 4.0 };
 	//glm::vec3 cameraPosition = { -0.1, 0.5, 1.6 };//sphere
 
@@ -19,9 +19,9 @@ public:
 //	glm::vec3 lightSource = { 0.2, 1.1, 0.7 };
 //	glm::vec3 lightSource = { 0.0,0.4,0.7 };
 //	glm::vec3 lightSource = { 0.0,0.5,0.6 };
-	glm::vec3 lightSource = { 0.5,0.6,0.5 };
+	glm::vec3 lightSource = { 0.5,0.6,-0.5 };
 	bool lookAtToggle = false;
-	float scalingFactor = 160;
+	float scalingFactor = 260;
 	glm::mat3 rotationX = {
 		1.0, 0.0, 0.0,
 		0.0, cos(theta), sin(theta),

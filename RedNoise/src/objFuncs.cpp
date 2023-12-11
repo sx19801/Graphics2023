@@ -61,7 +61,9 @@ std::unordered_map<std::string, glm::vec4> loadMatOBJ() {
 	return materialMap;
 }
 
-
+Uint32 convColourToUint32(Colour colour) {
+	return (255 << 24) + (colour.red << 16) + (colour.green << 8) + colour.blue;
+}
 
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window) {
 	std::string myText;

@@ -23,6 +23,8 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 
 glm::vec3 calcSurfaceNormal(ModelTriangle);
 
+Uint32 convColourToUint32(Colour colour);
+
 CanvasTriangle convertModelTriToCanvas(ModelTriangle modelTriangle);
 
 #endif // !OBJFUNCS_H

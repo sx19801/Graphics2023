@@ -81,14 +81,14 @@ std::vector<CanvasPoint> orderByIncrX(CanvasTriangle triangle) {
 void zDepthCheck(CanvasPoint xy, float z, std::vector<std::vector<float>>& zBuffer, Uint32 colourUint32, DrawingWindow& window) {
 	
 	if (zBuffer[xy.x][xy.y] == 0) {
-		zBuffer[xy.x][xy.y] = 1/z;
-		window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
+		zBuffer[xy.x][xy.y] = z;
+		window.setPixelColour((xy.x), (xy.y), colourUint32);
 		//window.renderFrame();
 	}
 	else {
-		if (zBuffer[xy.x][xy.y] > 1/z) {
-			zBuffer[xy.x][xy.y] = 1/z;
-			window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
+		if (zBuffer[xy.x][xy.y] < z) {
+			zBuffer[xy.x][xy.y] = z;
+			window.setPixelColour((xy.x), (xy.y), colourUint32);
 			//window.renderFrame();
 		}
 		else {
@@ -123,7 +123,7 @@ void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& wi
 	float fromY = (from.y);
 	float changeInY = toY - fromY;
 	float changeInX = toX - fromX;
-	float changeInZ = to.depth - from.depth;
+	float changeInZ = (to.depth) - (from.depth);
 	float numberOfSteps = std::max(std::abs(changeInY), std::abs(changeInX));
 
 	float toZ = to.depth;
@@ -203,6 +203,8 @@ void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& w
 	drawLine(triangle.v1(), triangle.v2(), colour, window);
 	drawLine(triangle.v2(), triangle.v0(), colour, window);*/
 
+	
+
 	//std::cout << "z : " << triangle.v1().depth << std::endl;
 	float changeInY = incrYPoints[2].y - incrYPoints[0].y;
 	float changeInX = incrYPoints[2].x - incrYPoints[0].x;
@@ -259,6 +261,62 @@ void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& w
 		drawLine(lineStart, lineEnd, colour, window, zBuffer);
 		//window.renderFrame();
 	}
+
+
+	
+
+	//USING BARYCENTRIC COORDS
+	
+	//int minX = std::min({ triangle.v0().x,triangle.v1().x, triangle.v2().x});
+	//int minY = std::min({ triangle.v0().y,triangle.v1().y, triangle.v2().y });
+	//int maxX = std::max({ triangle.v0().x,triangle.v1().x, triangle.v2().x });
+	//int maxY = std::max({ triangle.v0().y,triangle.v1().y, triangle.v2().y });
+
+	////std::cout << minX << " " << minY << " " << maxX << " " << maxY << '\n';
+
+	////bounding box
+	////Uint32 colourUint32 = (255 << 24) + (255 << 16) + (255 << 8) + 255;
+	//for (int x = minX; x <= maxX; ++x) {
+	//	for (int y = minY; y <= maxY; ++y) {
+	//		//calculate barycentric of pixel 
+	//		CanvasPoint XY(x, y);
+	//		glm::vec3 bary = barycentricCoords(XY, triangle.v0(), triangle.v1(), triangle.v2());
+	//		if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0) {
+	//			//pixel inside triangle 
+	//			float u = (triangle.v0().x * bary.x + triangle.v1().x * bary.y + triangle.v2().x * bary.z);
+	//			float v = (triangle.v0().y * bary.x + triangle.v1().y * bary.y + triangle.v2().y * bary.z);
+
+	//			float z = (1.0f/triangle.v0().depth) * bary.x + (1.0f/triangle.v1().depth) * bary.y + (1.0f/triangle.v2().depth) * bary.z;
+	//			//int u = round(a.x * bary.x + b.x * bary.y + c.x * bary.z);
+	//			//int v = round(a.y * bary.x + b.y * bary.y + c.y * bary.z);
+	//			z = 1 / z;
+	//			//std::cout << glm::to_string(bary) << '\n';
+
+	//			//std::cout << u << " " << v << '\n';
+	//			//window.setPixelColour(u, v, colourUint32);
+	//			//window.renderFrame();
+
+	//			
+	//			//std::cout << textureVectorIndex << '\n';
+	//			
+	//			Uint32 colourUint32 = convColourToUint32(colour);
+
+	//			if (!((x < 0) || (x >= window.width) || (y < 0) || (y >= window.height))) {
+
+	//				//window.setPixelColour(x, y, RGBInteger);
+	//				zDepthCheck(XY, z, zBuffer, colourUint32, window);
+	//			}
+
+
+	//		}
+
+	//	}
+	//	window.renderFrame();
+	//}
+
+
+
+
 }
 
 CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::mat3 cameraOrientation, glm::vec3 vertexPosition, float focalLength) {
@@ -270,18 +328,20 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 cameraPosition, glm::mat3 camer
 
 	glm::vec3 dist = vertexPosition - cameraPosition;
 	
-	glm::vec3 adjustedVector = dist * cameraOrientation;
+	glm::vec3 adjustedVector = dist* cameraOrientation;
 
 
 	intersectPoint.x = (focalLength * (-(adjustedVector.x) / adjustedVector.z));
 	intersectPoint.y = (focalLength * ((adjustedVector.y) / adjustedVector.z));
 
-	
+	//float distZ = glm::distance(vertexPosition.z - camerPosition);
 	//float zDistance = sqrt((pow(cameraPosition.x- vertexPosition.x, 2)+pow(cameraPosition.y - vertexPosition.y,2)+pow(cameraPosition.z - vertexPosition.z,2)));
 	
-	intersectPoint.depth = adjustedVector.z;
+	intersectPoint.depth = adjustedVector.z;				//COULD BE WRONG TO DO INVERSE AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 	//intersectPoint.depth = zDistance;
 
 	return intersectPoint;
 };
+
+
 
