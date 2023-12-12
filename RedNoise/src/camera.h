@@ -21,7 +21,7 @@ public:
 //	glm::vec3 lightSource = { 0.0,0.5,0.6 };
 	glm::vec3 lightSource = { 0.5,0.6,-0.5 };
 	bool lookAtToggle = false;
-	float scalingFactor = 260;
+	float scalingFactor = 160;
 	glm::mat3 rotationX = {
 		1.0, 0.0, 0.0,
 		0.0, cos(theta), sin(theta),
