@@ -205,114 +205,114 @@ void drawFilledTriangle(CanvasTriangle triangle, Colour colour, DrawingWindow& w
 
 	
 
-	//std::cout << "z : " << triangle.v1().depth << std::endl;
-	float changeInY = incrYPoints[2].y - incrYPoints[0].y;
-	float changeInX = incrYPoints[2].x - incrYPoints[0].x;
-	float changeInZ = incrYPoints[2].depth - incrYPoints[0].depth;
+	////std::cout << "z : " << triangle.v1().depth << std::endl;
+	//float changeInY = incrYPoints[2].y - incrYPoints[0].y;
+	//float changeInX = incrYPoints[2].x - incrYPoints[0].x;
+	//float changeInZ = incrYPoints[2].depth - incrYPoints[0].depth;
 
-	float ratio = (incrYPoints[2].y - incrYPoints[1].y) / changeInY;
+	//float ratio = (incrYPoints[2].y - incrYPoints[1].y) / changeInY;
 
-	CanvasPoint newMidPoint;
-	newMidPoint.y = incrYPoints[1].y;
-	newMidPoint.x = incrYPoints[2].x - changeInX * ratio;
-	newMidPoint.depth = incrYPoints[2].depth - changeInZ * ratio;
+	//CanvasPoint newMidPoint;
+	//newMidPoint.y = incrYPoints[1].y;
+	//newMidPoint.x = incrYPoints[2].x - changeInX * ratio;
+	//newMidPoint.depth = incrYPoints[2].depth - changeInZ * ratio;
 
-	CanvasPoint leftMidPoint;
-	CanvasPoint rightMidPoint;
-	//if (newMidPoint.x < 0) std::cout << newMidPoint << '\n';
-
-
+	//CanvasPoint leftMidPoint;
+	//CanvasPoint rightMidPoint;
+	////if (newMidPoint.x < 0) std::cout << newMidPoint << '\n';
 
 
-	if (newMidPoint.x > incrYPoints[1].x) {
-		leftMidPoint = incrYPoints[1];
-		rightMidPoint = newMidPoint;
-	}
-	else {
-		leftMidPoint = newMidPoint;
-		rightMidPoint = incrYPoints[1];
-	}
-
-	float changeInYTop = (incrYPoints[1].y - incrYPoints[0].y);
-	float changeInYBot = (incrYPoints[2].y - incrYPoints[1].y);
 
 
-	std::vector<CanvasPoint> topLeftArray = interpolateSinglePoints(incrYPoints[0], leftMidPoint, changeInYTop);
-	std::vector<CanvasPoint> topRightArray = interpolateSinglePoints(incrYPoints[0], rightMidPoint, changeInYTop);
-	std::vector<CanvasPoint> botLeftArray = interpolateSinglePoints(leftMidPoint, incrYPoints[2], changeInYBot);
-	std::vector<CanvasPoint> botRightArray = interpolateSinglePoints(rightMidPoint, incrYPoints[2], changeInYBot);
+	//if (newMidPoint.x > incrYPoints[1].x) {
+	//	leftMidPoint = incrYPoints[1];
+	//	rightMidPoint = newMidPoint;
+	//}
+	//else {
+	//	leftMidPoint = newMidPoint;
+	//	rightMidPoint = incrYPoints[1];
+	//}
 
-	for (size_t i = 0; i < changeInYTop; i++) {
-		//std::cout << topLeftXArray.size()<<" "<<topRightXArray.size()<<" " <<i<<" "<<changeInYTop<< std::endl;
+	//float changeInYTop = (incrYPoints[1].y - incrYPoints[0].y);
+	//float changeInYBot = (incrYPoints[2].y - incrYPoints[1].y);
 
-		CanvasPoint lineStart((topLeftArray[i].x), (incrYPoints[0].y + i), topLeftArray[i].depth);
-		CanvasPoint lineEnd((topRightArray[i].x), (incrYPoints[0].y + i), topRightArray[i].depth);
 
-		drawLine(lineStart, lineEnd, colour, window, zBuffer);
-		//window.renderFrame();
-	}
+	//std::vector<CanvasPoint> topLeftArray = interpolateSinglePoints(incrYPoints[0], leftMidPoint, changeInYTop);
+	//std::vector<CanvasPoint> topRightArray = interpolateSinglePoints(incrYPoints[0], rightMidPoint, changeInYTop);
+	//std::vector<CanvasPoint> botLeftArray = interpolateSinglePoints(leftMidPoint, incrYPoints[2], changeInYBot);
+	//std::vector<CanvasPoint> botRightArray = interpolateSinglePoints(rightMidPoint, incrYPoints[2], changeInYBot);
 
-	for (size_t i = 0; i < changeInYBot; i++) {
-		//	std::cout << " this the bot triangle " << botLeftXArray.size() << " " << botRightXArray.size() << " " << i << " " << changeInYBot << std::endl;
+	//for (size_t i = 0; i < changeInYTop; i++) {
+	//	//std::cout << topLeftXArray.size()<<" "<<topRightXArray.size()<<" " <<i<<" "<<changeInYTop<< std::endl;
 
-		CanvasPoint lineStart((botLeftArray[i].x), (incrYPoints[1].y) + i, botLeftArray[i].depth);
-		CanvasPoint lineEnd((botRightArray[i].x), (incrYPoints[1].y) + i, botRightArray[i].depth);
+	//	CanvasPoint lineStart((topLeftArray[i].x), (incrYPoints[0].y + i), topLeftArray[i].depth);
+	//	CanvasPoint lineEnd((topRightArray[i].x), (incrYPoints[0].y + i), topRightArray[i].depth);
 
-		drawLine(lineStart, lineEnd, colour, window, zBuffer);
-		//window.renderFrame();
-	}
+	//	drawLine(lineStart, lineEnd, colour, window, zBuffer);
+	//	//window.renderFrame();
+	//}
+
+	//for (size_t i = 0; i < changeInYBot; i++) {
+	//	//	std::cout << " this the bot triangle " << botLeftXArray.size() << " " << botRightXArray.size() << " " << i << " " << changeInYBot << std::endl;
+
+	//	CanvasPoint lineStart((botLeftArray[i].x), (incrYPoints[1].y) + i, botLeftArray[i].depth);
+	//	CanvasPoint lineEnd((botRightArray[i].x), (incrYPoints[1].y) + i, botRightArray[i].depth);
+
+	//	drawLine(lineStart, lineEnd, colour, window, zBuffer);
+	//	//window.renderFrame();
+	//}
 
 
 	
 
 	//USING BARYCENTRIC COORDS
 	
-	//int minX = std::min({ triangle.v0().x,triangle.v1().x, triangle.v2().x});
-	//int minY = std::min({ triangle.v0().y,triangle.v1().y, triangle.v2().y });
-	//int maxX = std::max({ triangle.v0().x,triangle.v1().x, triangle.v2().x });
-	//int maxY = std::max({ triangle.v0().y,triangle.v1().y, triangle.v2().y });
+	int minX = std::min({ triangle.v0().x,triangle.v1().x, triangle.v2().x});
+	int minY = std::min({ triangle.v0().y,triangle.v1().y, triangle.v2().y });
+	int maxX = std::max({ triangle.v0().x,triangle.v1().x, triangle.v2().x });
+	int maxY = std::max({ triangle.v0().y,triangle.v1().y, triangle.v2().y });
 
-	////std::cout << minX << " " << minY << " " << maxX << " " << maxY << '\n';
+	//std::cout << minX << " " << minY << " " << maxX << " " << maxY << '\n';
 
 	////bounding box
-	////Uint32 colourUint32 = (255 << 24) + (255 << 16) + (255 << 8) + 255;
-	//for (int x = minX; x <= maxX; ++x) {
-	//	for (int y = minY; y <= maxY; ++y) {
-	//		//calculate barycentric of pixel 
-	//		CanvasPoint XY(x, y);
-	//		glm::vec3 bary = barycentricCoords(XY, triangle.v0(), triangle.v1(), triangle.v2());
-	//		if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0) {
-	//			//pixel inside triangle 
-	//			float u = (triangle.v0().x * bary.x + triangle.v1().x * bary.y + triangle.v2().x * bary.z);
-	//			float v = (triangle.v0().y * bary.x + triangle.v1().y * bary.y + triangle.v2().y * bary.z);
+	//Uint32 colourUint32 = (255 << 24) + (255 << 16) + (255 << 8) + 255;
+	for (int x = minX; x <= maxX; ++x) {
+		for (int y = minY; y <= maxY; ++y) {
+			//calculate barycentric of pixel 
+			CanvasPoint XY(x, y);
+			glm::vec3 bary = barycentricCoords(XY, triangle.v0(), triangle.v1(), triangle.v2());
+			if (bary.x >= 0 && bary.y >= 0 && bary.z >= 0) {
+				//pixel inside triangle 
+				float u = (triangle.v0().x * bary.x + triangle.v1().x * bary.y + triangle.v2().x * bary.z);
+				float v = (triangle.v0().y * bary.x + triangle.v1().y * bary.y + triangle.v2().y * bary.z);
 
-	//			float z = (1.0f/triangle.v0().depth) * bary.x + (1.0f/triangle.v1().depth) * bary.y + (1.0f/triangle.v2().depth) * bary.z;
-	//			//int u = round(a.x * bary.x + b.x * bary.y + c.x * bary.z);
-	//			//int v = round(a.y * bary.x + b.y * bary.y + c.y * bary.z);
-	//			z = 1 / z;
-	//			//std::cout << glm::to_string(bary) << '\n';
+				float z = (1.0f/triangle.v0().depth) * bary.x + (1.0f/triangle.v1().depth) * bary.y + (1.0f/triangle.v2().depth) * bary.z;
+				//int u = round(a.x * bary.x + b.x * bary.y + c.x * bary.z);
+				//int v = round(a.y * bary.x + b.y * bary.y + c.y * bary.z);
+				z = 1 / z;
+				//std::cout << glm::to_string(bary) << '\n';
 
-	//			//std::cout << u << " " << v << '\n';
-	//			//window.setPixelColour(u, v, colourUint32);
-	//			//window.renderFrame();
+				//std::cout << u << " " << v << '\n';
+				//window.setPixelColour(u, v, colourUint32);
+				//window.renderFrame();
 
-	//			
-	//			//std::cout << textureVectorIndex << '\n';
-	//			
-	//			Uint32 colourUint32 = convColourToUint32(colour);
+				
+				//std::cout << textureVectorIndex << '\n';
+				
+				Uint32 colourUint32 = convColourToUint32(colour);
 
-	//			if (!((x < 0) || (x >= window.width) || (y < 0) || (y >= window.height))) {
+				if (!((x < 0) || (x >= window.width) || (y < 0) || (y >= window.height))) {
 
-	//				//window.setPixelColour(x, y, RGBInteger);
-	//				zDepthCheck(XY, z, zBuffer, colourUint32, window);
-	//			}
+					//window.setPixelColour(x, y, RGBInteger);
+					zDepthCheck(XY, z, zBuffer, colourUint32, window);
+				}
 
 
-	//		}
+			}
 
-	//	}
-	//	window.renderFrame();
-	//}
+		}
+		//window.renderFrame();
+	}
 
 
 
