@@ -14,7 +14,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(RedNoise)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 # Note, we do this for glm because it's a header only library and because we shipped it with the project
 # normally you would use find_package(<package_name>) for libraries with actual objects
@@ -35,7 +35,7 @@ add_executable(RedNoise
         libs/sdw/TextureMap.cpp
         libs/sdw/TexturePoint.cpp
         libs/sdw/Utils.cpp
-        src/RedNoise.cpp "src/objFuncs.h" "src/drawFuncs.h"  "src/drawFuncs.cpp")
+             "src/camera.cpp" "src/camera.h" "src/objFuncs.cpp" "src/objFuncs.h" "src/RedNoise.cpp" "src/Triangle.cpp" "src/Triangle.h" "src/rayTracing.cpp" "src/rayTracing.h" "src/rays.cpp" "src/rays.h" "src/RedNoise.h" "src/lightShade.cpp" "src/textureMapping.cpp" "src/textureMapping.h")
 
 if (MSVC)
     target_compile_options(RedNoise
