@@ -580,7 +580,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 			//CanvasTriangle triangle(CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height), CanvasPoint(rand() % window.width, rand() % window.height));
 			//std::cout << triangle << '\n';
 			//drawFilledTriangle(triangle, Colour(rand() % 255, rand() % 255, rand() % 255), window);
-			std::vector<ModelTriangle>& triangles = loadGeoOBJ(1, window);
+			std::vector<ModelTriangle> triangles = loadGeoOBJ(1, window);
 			std::vector<ModelTriangle> triangles2;
 			triangles2.push_back(triangles[26]);
 			//std::cout << "triangles size " << triangles.size() << std::endl;
@@ -744,7 +744,7 @@ int main(int argc, char* argv[]) {
 	int lightType = 1;
 	int texture = 0;
 
-	std::vector<ModelTriangle>& triangles = loadGeoOBJ(scalingFactor, window);
+	std::vector<ModelTriangle> triangles = loadGeoOBJ(scalingFactor, window);
 
 	bool on = true;
 
