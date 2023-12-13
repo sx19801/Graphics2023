@@ -48,8 +48,8 @@ RayTriangleIntersection getClosestValidIntersection(std::vector<ModelTriangle>& 
 				
 			}
 		}
-		if (shadowCheck == true) {
-			//closestIntersection.shadow = true;
+		if (shadowCheck == true && closestIntersection.valid == true) {
+			closestIntersection.shadow = true;
 			closestIntersection.totalDistFromLight = glm::distance(camera.lightSource, originalPoint);
 		}
 	}

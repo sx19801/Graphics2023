@@ -59,7 +59,7 @@ std::vector<glm::vec3> returnAllVertices(std::vector<ModelTriangle>& triangles) 
 	return vertices;
 }
 
-void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera, int& lightType, std::vector<std::vector<float>>& shadowMap, std::vector<std::vector<float>>& shadowMap2) {
+void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera, int& lightType, std::vector<std::vector<float>>& shadowMap, std::vector<std::vector<float>>& shadowMap2, std::vector<std::vector<glm::vec3>>& colourMap) {
 	glm::vec3 colour;
 	float pointToLightDist;
 	float distance2;
@@ -113,6 +113,10 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 	RayTriangleIntersection checkShadowIntersectionPoint;
 	glm::vec3 pointNormal;
 
+	int colourR;
+	int colourG;
+	int colourB;
+
 	int i = 0;
 	std::vector<glm::vec3> triangleVertices = returnAllVertices(triangles);
 	std::vector<glm::vec3> boundingBox = calculateBoundingBox(triangleVertices);
@@ -139,6 +143,14 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 					colour.g = closestValidIntersection.intersectedTriangle.colour.green;
 					colour.b = closestValidIntersection.intersectedTriangle.colour.blue;
 
+					
+
+					/*colourR = int(std::clamp(round((colour.r)), 0.0f, 255.0f));
+					colourG = int(std::clamp(round((colour.g)), 0.0f, 255.0f));
+					colourB = int(std::clamp(round((colour.b)), 0.0f, 255.0f));
+
+
+					colourMap[x][y] = { colourR,colourG,colourB };*/
 
 					//directionVector = getDirectionVector(camera.cameraPosition, pointInSpace);
 					pointToLightDist = glm::distance(closestValidIntersection.intersectionPoint, camera.lightSource);
@@ -310,9 +322,16 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 
 					}
 
+					//STORE COLOUR INTO COLOUR MAP
+					
+						
+					
+
+
+
 					//MULTI LIGHTSOURCES
 					float radius = 0.25;
-					int numberOfLights = 20;
+					int numberOfLights = 8;
 					std::vector<glm::vec3> lights;
 					for (size_t i = 0; i < numberOfLights; i++) {
 						lights.push_back(camera.getLightSource(camera.lightSource, radius));
@@ -330,18 +349,14 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 								shadowMap[x][y] = 0.15;
 							}
 							else {
-								shadowMap[x][y] = shadowMap[x][y] - 0.03;
+								shadowMap[x][y] = shadowMap[x][y] - 0.05;
 							}
-							ambient = shadowMap[x][y];
+							//ambient = shadowMap[x][y];
 						}
 						
 
 					}
 
-					
-					//loop through every light  in lights
-
-					//make shadow map x y value equal to the  
 
 					//				combine = ((intensity)) + (aoi1*(intensity*0.83)) + ambient;
 					combine = ((intensity)) + (aoi1 * (intensity)) + ambient;
@@ -353,9 +368,9 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 
 					//specular = specular * 0.7;
 
-					int colourR = int(std::clamp(round((colour.r * combine) + specular), 0.0f, 255.0f));
-					int colourG = int(std::clamp(round((colour.g * combine) + specular), 0.0f, 255.0f));
-					int colourB = int(std::clamp(round((colour.b * combine) + specular), 0.0f, 255.0f));
+					colourR = int(std::clamp(round((colour.r * combine) + specular), 0.0f, 255.0f));
+					colourG = int(std::clamp(round((colour.g * combine) + specular), 0.0f, 255.0f));
+					colourB = int(std::clamp(round((colour.b * combine) + specular), 0.0f, 255.0f));
 
 					//if (combine < 0.1) combine = 0.1;
 					colourUint32 = (255 << 24) + (colourR << 16) + (colourG << 8) + colourB;
@@ -374,6 +389,37 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 			}
 		}
 	}
+
+
+
+//	for (int i = 0; i < WIDTH; i++) {
+//		for (int j = 0; j < HEIGHT; j++) {
+//		
+////			std::cout << shadowMap[i][j] << " ";
+//
+//			if (!shadowMap[i][j] == 0) {
+//				shadowMap2[i][j] = shadowMap[i][j] + shadowMap[std::clamp(i - 1, 0, WIDTH)][std::clamp(j - 1, 0, HEIGHT - 1)] + shadowMap[std::clamp(i - 1, 0, WIDTH - 1)][j] + shadowMap[std::clamp(i - 1, 0, WIDTH - 1)][std::clamp(j + 1, 0, HEIGHT - 1)] + shadowMap[i][std::clamp(j - 1, 0, HEIGHT - 1)] + shadowMap[std::clamp(i + 1, 0, WIDTH - 1)][std::clamp(j - 1, 0, HEIGHT - 1)] + shadowMap[std::clamp(i + 1, 0, WIDTH - 1)][j] + shadowMap[i][std::clamp(j + 1, 0, HEIGHT - 1)] + shadowMap[std::clamp(i + 1, 0, WIDTH - 1)][std::clamp(j + 1, 0, HEIGHT - 1)];
+//				shadowMap2[i][j] = shadowMap2[i][j] / 9;
+//
+//				ambient = shadowMap2[i][j];
+//
+//				glm::vec3 colourFromMap = colourMap[i][j];
+//
+//				combine = 1;
+//
+//				int colourR1 = int(std::clamp(round((colourFromMap.r * combine)), 0.0f, 255.0f));
+//				int colourG1 = int(std::clamp(round((colourFromMap.g * combine)), 0.0f, 255.0f));
+//				int colourB1 = int(std::clamp(round((colourFromMap.b * combine)), 0.0f, 255.0f));
+//
+//
+//				colourUint32 = (255 << 24) + (colourR1 << 16) + (colourG1 << 8) + colourB1;
+//				//window.setPixelColour(i, j, colourUint32);
+//			}
+//
+//		}
+//		//std::cout << '\n';
+//	}
+	
 }
 
 
@@ -480,7 +526,7 @@ void drawRefLines(DrawingWindow& window, std::vector<std::vector<float>>& zBuffe
 }
 
 
-void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& renderType, int& lightType, int& texture, std::vector<std::vector<float>>& zBuffer, bool& on, std::vector<ModelTriangle>& triangles, std::vector<std::vector<float>>& shadowMap, std::vector<std::vector<float>>& shadowMap2) {
+void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& renderType, int& lightType, int& texture, std::vector<std::vector<float>>& zBuffer, bool& on, std::vector<ModelTriangle>& triangles, std::vector<std::vector<float>>& shadowMap, std::vector<std::vector<float>>& shadowMap2, std::vector<std::vector<glm::vec3>>& colourMap) {
 	int mode;
 	float theta = 0.5;
 	float scalingFactor = 0.35;
@@ -635,7 +681,7 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 			std::cout << "raytrace" << '\n';
 			renderType = 3;
 			resetDepthBuffer(window, zBuffer);
-			drawRayTracing(window, triangles, camera, lightType, shadowMap, shadowMap2);
+			drawRayTracing(window, triangles, camera, lightType, shadowMap, shadowMap2, colourMap);
 			window.renderFrame();
 		}
 		else if (event.key.keysym.sym == SDLK_t) {
@@ -712,6 +758,7 @@ int main(int argc, char* argv[]) {
 	std::vector<std::vector<float>> zBuffer(WIDTH, std::vector<float>(HEIGHT));
 	std::vector<std::vector<float>> shadowMap(WIDTH, std::vector<float>(HEIGHT));
 	std::vector<std::vector<float>> shadowMap2(WIDTH, std::vector<float>(HEIGHT));
+	std::vector<std::vector<glm::vec3>> colourMap(WIDTH, std::vector<glm::vec3>(HEIGHT));
 
 	CanvasPoint A = { 160, 10 };
 	CanvasPoint B = { 300, 230 };
@@ -739,7 +786,7 @@ int main(int argc, char* argv[]) {
 	while (true) {
 		//std::cout << glm::to_string(camera.getLightSource(lightOrigin, radius)) << '\n';
 	
-		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType, lightType, texture, zBuffer, on, triangles, shadowMap, shadowMap2);
+		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType, lightType, texture, zBuffer, on, triangles, shadowMap, shadowMap2, colourMap);
 
 		if (renderType == 1) {
 			resetDepthBuffer(window, zBuffer);
