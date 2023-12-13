@@ -98,7 +98,10 @@ glm::vec3 Camera::getPointBezier(Camera& camera) {
 }
 
 void Camera::moveAlongBezier(Camera& camera, glm::vec3& newPosition) {
-	camera.cameraPosition = newPosition;
+	//camera.cameraPosition = newPosition;					//for camera movement
+	camera.lookAtPoint = newPosition;						//for lookatpoint movement
+
+
 	camera.lookAt(camera, camera.lookAtPoint);
 }
 
@@ -108,6 +111,8 @@ void Camera::update(Camera& camera) {
 	glm::vec3 newPosition = camera.getPointBezier(camera);
 	camera.moveAlongBezier(camera, newPosition);
 }
+
+
 
 glm::vec3 Camera::getLightSource(glm::vec3& lightOrigin, float& radius) {
 	float d;

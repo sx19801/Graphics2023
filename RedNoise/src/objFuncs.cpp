@@ -16,7 +16,7 @@ std::unordered_map<std::string, glm::vec4> loadMatOBJ() {
 	std::unordered_map<std::string, glm::vec4> materialMap;						//initialise hashmap for colour
 
 	std::string myText;
-	std::ifstream MyReadFile("../../../OBJFiles/textured-cornell-box.mtl");
+	std::ifstream MyReadFile("../../../objFiles/textured-cornell-box.mtl");
 	Colour colour;
 	std::string name;
 
@@ -67,8 +67,9 @@ Uint32 convColourToUint32(Colour colour) {
 
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window) {
 	std::string myText;
-	std::ifstream MyReadFile("../../../OBJFiles/textured-cornell-box.obj");
-	std::ifstream MyReadFileSphere("../../../OBJFiles/sphere.obj");
+	std::ifstream MyReadFile("../../../objFiles/textured-cornell-box.obj");
+	std::ifstream MyReadFileSphere("../../../objFiles/sphere.obj");
+
 
 	Colour rgbColour;
 	ModelTriangle modelTriangle;
@@ -82,6 +83,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 	std::vector<glm::vec3> multiSetVertices;
 	glm::vec3 singleSetVertices;
 
+	
 	std::unordered_map<std::string, glm::vec4> colourMap = loadMatOBJ();
 	
 	while (getline(MyReadFile, myText)) {
@@ -90,6 +92,8 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 		std::stringstream ss3(myText);
 		std::string identifier;
 		ss >> identifier;
+
+		//std::cout << MyReadFile.rdbuf() << '\n';
 
 		/*std::cout << myText[0] << std::endl;
 		for (size_t i = 0; i < myText.size(); i++) std::cout << myText[i] << " " << std::endl;*/

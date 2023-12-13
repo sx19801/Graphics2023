@@ -1,4 +1,5 @@
 #include "RedNoise.h"
+#include <iomanip>
 
 bool intersects(glm::vec3 origin, glm::vec3 ray, glm::vec3 minBox, glm::vec3 maxBox) {
 	float tmin = (minBox.x - origin.x) / ray.x;
@@ -770,6 +771,9 @@ int main(int argc, char* argv[]) {
 	int numberOfLights = 1;
 	std::vector<glm::vec3> lights;
 
+	
+	int counter = 1;
+
 	A.texturePoint = {float(195.0f/480.0f),float(5.0f/395.0f) };
 	B.texturePoint = {float(395.0f/480.0f), float(380.0f/395.0f)};
 	C.texturePoint = {float(65.0f/480.0f), float(330.0f/395.0f)};
@@ -803,13 +807,21 @@ int main(int argc, char* argv[]) {
 		//drawStrokedTriangle(triangle, WHITE, window, zBuffer);
 		
 		//BEZIER CURVE
-		//camera.update(camera);															//uncomment for curve movement
+		camera.update(camera);															//uncomment for curve movement
 
 
 		//drawRefLines(window, zBuffer);
 
 		lights.clear();
 		window.renderFrame();
+
+		std::ostringstream filename;
+		filename << "frame_" << std::setfill('0') << std::setw(5) << counter << ".bmp";
+		
+		window.saveBMP(filename.str());
+		//std::cout << filename.str() << '\n';
+		counter++;
+		
 		//_sleep(50);
 		//std::cout << "yo " << '\n';
 	}
