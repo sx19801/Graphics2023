@@ -2,7 +2,7 @@
 #define RAYTRACING_H
 #include "RayTriangleIntersection.h"
 #include <ModelTriangle.h>
-#include <utils.h>
+#include <Utils.h>
 #include <glm/ext.hpp>
 #include "camera.h"
 #include <CanvasPoint.h>

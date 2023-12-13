@@ -77,5 +77,46 @@ void Camera::lookAt(Camera& camera, glm::vec3 lookAtPoint) {
 		-forward,
 	};
 
-	 //camera.lookAtToggle = false;
+	 camera.lookAtToggle = false;
+}
+
+glm::vec3 Camera::getPointBezier(Camera& camera) {
+	float t = camera.t;
+	
+	float u = 1 - t;
+	float tt = t * t;
+	float uu = u * u;
+	float uuu = uu * u;
+	float ttt = tt * t;
+
+	glm::vec3 point = (camera.p0 * uuu);		// First term
+	point += (camera.p1 * 3.0f * uu * t);		// Second term
+	point += (camera.p2 * 3.0f * u * tt);		// Third term
+	point += (camera.p3 * ttt);					// Fourth term
+
+	return point;
+}
+
+void Camera::moveAlongBezier(Camera& camera, glm::vec3& newPosition) {
+	camera.cameraPosition = newPosition;
+	camera.lookAt(camera, camera.lookAtPoint);
+}
+
+void Camera::update(Camera& camera) {
+	camera.t += camera.speed;
+	if (camera.t > 1.0) camera.t = 1.0;
+	glm::vec3 newPosition = camera.getPointBezier(camera);
+	camera.moveAlongBezier(camera, newPosition);
+}
+
+glm::vec3 Camera::getLightSource(glm::vec3& lightOrigin, float& radius) {
+	float d;
+	double x, y, z;
+	do {
+	x = ((double)rand() / RAND_MAX) * radius * 2.0 - radius + lightOrigin.x;
+	y = ((double)rand() / RAND_MAX) * radius * 2.0 - radius + lightOrigin.y;
+	z = ((double)rand() / RAND_MAX) * radius * 2.0 - radius + lightOrigin.z;
+	d = (x - lightOrigin.x) * (x - lightOrigin.x) + (y - lightOrigin.y) * (y- lightOrigin.y) + (z- lightOrigin.z) * (z - lightOrigin.z);
+	} while (d > radius*radius);
+	return { x, y, z };	
 }

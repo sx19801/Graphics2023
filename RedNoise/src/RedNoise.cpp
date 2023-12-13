@@ -59,7 +59,7 @@ std::vector<glm::vec3> returnAllVertices(std::vector<ModelTriangle>& triangles) 
 	return vertices;
 }
 
-void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera, int& lightType) {
+void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& camera, int& lightType, std::vector<std::vector<float>>& shadowMap, std::vector<std::vector<float>>& shadowMap2, std::vector<std::vector<glm::vec3>>& colourMap) {
 	glm::vec3 colour;
 	float pointToLightDist;
 	float distance2;
@@ -113,6 +113,10 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 	RayTriangleIntersection checkShadowIntersectionPoint;
 	glm::vec3 pointNormal;
 
+	int colourR;
+	int colourG;
+	int colourB;
+
 	int i = 0;
 	std::vector<glm::vec3> triangleVertices = returnAllVertices(triangles);
 	std::vector<glm::vec3> boundingBox = calculateBoundingBox(triangleVertices);
@@ -139,14 +143,20 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 					colour.g = closestValidIntersection.intersectedTriangle.colour.green;
 					colour.b = closestValidIntersection.intersectedTriangle.colour.blue;
 
+					
+
+					/*colourR = int(std::clamp(round((colour.r)), 0.0f, 255.0f));
+					colourG = int(std::clamp(round((colour.g)), 0.0f, 255.0f));
+					colourB = int(std::clamp(round((colour.b)), 0.0f, 255.0f));
+
+
+					colourMap[x][y] = { colourR,colourG,colourB };*/
 
 					//directionVector = getDirectionVector(camera.cameraPosition, pointInSpace);
-					closestValidIntersection.shadowCheck = true;
-					lightDirectionVector = getDirectionVector(closestValidIntersection.intersectionPoint, camera.lightSource);
-					checkShadowIntersectionPoint = getClosestValidIntersection(triangles, closestValidIntersection.intersectionPoint, lightDirectionVector, closestValidIntersection.triangleIndex, camera, closestValidIntersection.shadowCheck);
-
 					pointToLightDist = glm::distance(closestValidIntersection.intersectionPoint, camera.lightSource);
-					distance2 = glm::distance(closestValidIntersection.intersectionPoint, checkShadowIntersectionPoint.intersectionPoint);
+					closestValidIntersection.shadowCheck = true;
+
+
 
 
 					switch (lightType)
@@ -264,7 +274,7 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 
 						intensity = proximityLightIntensity(pointToLightDist);
 						//combine = (1.7 * intensity * (aoi1));
-						ambient = 0.06;
+						ambient = 0.15;
 						//colourUint32 = (255 << 24) + (int(std::clamp(round((colour.red * combine) + specular), 0.0f, 255.0f)) << 16) + (int(std::clamp(round((colour.green * combine) + specular), 0.0f, 255.0f)) << 8) + std::clamp(round((colour.blue * combine) + specular), 0.0f, 255.0f);
 
 
@@ -312,28 +322,41 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 
 					}
 
-					//TEXTURE
+					//STORE COLOUR INTO COLOUR MAP
+					
+						
+					
 
 
 
-					//SHADOWS
-					if ((distance2 < pointToLightDist) && (distance2 > 0)) { //SHADOWS
-						/*intensity = proximityLightIntensity(pointToLightDist, intensity);
-						aoi1 = angleOfIncidence(lightDirectionVector, closestValidIntersection.intersectedTriangle.normal);
-						if (aoi1 > 1) aoi1 = 1;
-						if (aoi1 < 0.1) aoi1 = 0.1;
-						combine = 1.9*(intensity/2*(aoi1))+0.15;
-						if (combine < 0.03) combine = 0.03;
-						if (combine > 1) combine = 1;*/
+					//MULTI LIGHTSOURCES
+					float radius = 0.25;
+					int numberOfLights = 8;
+					std::vector<glm::vec3> lights;
+					for (size_t i = 0; i < numberOfLights; i++) {
+						lights.push_back(camera.getLightSource(camera.lightSource, radius));
+						lightDirectionVector = getDirectionVector(closestValidIntersection.intersectionPoint, lights[i]);
+						checkShadowIntersectionPoint = getClosestValidIntersection(triangles, closestValidIntersection.intersectionPoint, lightDirectionVector, closestValidIntersection.triangleIndex, camera, closestValidIntersection.shadowCheck);
+						distance2 = glm::distance(closestValidIntersection.intersectionPoint, checkShadowIntersectionPoint.intersectionPoint);
 
-						intensity = 0;
-						aoi1 = 0;
-						specular = 0;
-						ambient = 0.07;
+						if ((distance2 < pointToLightDist) && distance2 > 0) {
+							intensity = 0;
+							aoi1 = 0;
+							specular = 0;
+							//ambient = 0.07;
 
-						//combine = 0.2;
-						//specular = 0;
+							if (shadowMap[x][y] == 0) {
+								shadowMap[x][y] = 0.15;
+							}
+							else {
+								shadowMap[x][y] = shadowMap[x][y] - 0.05;
+							}
+							//ambient = shadowMap[x][y];
+						}
+						
+
 					}
+
 
 					//				combine = ((intensity)) + (aoi1*(intensity*0.83)) + ambient;
 					combine = ((intensity)) + (aoi1 * (intensity)) + ambient;
@@ -345,9 +368,9 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 
 					//specular = specular * 0.7;
 
-					int colourR = int(std::clamp(round((colour.r * combine) + specular), 0.0f, 255.0f));
-					int colourG = int(std::clamp(round((colour.g * combine) + specular), 0.0f, 255.0f));
-					int colourB = int(std::clamp(round((colour.b * combine) + specular), 0.0f, 255.0f));
+					colourR = int(std::clamp(round((colour.r * combine) + specular), 0.0f, 255.0f));
+					colourG = int(std::clamp(round((colour.g * combine) + specular), 0.0f, 255.0f));
+					colourB = int(std::clamp(round((colour.b * combine) + specular), 0.0f, 255.0f));
 
 					//if (combine < 0.1) combine = 0.1;
 					colourUint32 = (255 << 24) + (colourR << 16) + (colourG << 8) + colourB;
@@ -356,13 +379,47 @@ void drawRayTracing(DrawingWindow& window, std::vector<ModelTriangle>& triangles
 						colourUint32 = (255 << 24) + (int(combine1) << 16) + (int(combine2) << 8) + int(combine3);
 					}
 					window.setPixelColour(x, y, colourUint32);
+
+					lights.clear();
 				}
 				else { //NO VALID INTERSECTIONS 
 					window.setPixelColour(x, y, BLACK);
 				}
+				
 			}
 		}
 	}
+
+
+
+//	for (int i = 0; i < WIDTH; i++) {
+//		for (int j = 0; j < HEIGHT; j++) {
+//		
+////			std::cout << shadowMap[i][j] << " ";
+//
+//			if (!shadowMap[i][j] == 0) {
+//				shadowMap2[i][j] = shadowMap[i][j] + shadowMap[std::clamp(i - 1, 0, WIDTH)][std::clamp(j - 1, 0, HEIGHT - 1)] + shadowMap[std::clamp(i - 1, 0, WIDTH - 1)][j] + shadowMap[std::clamp(i - 1, 0, WIDTH - 1)][std::clamp(j + 1, 0, HEIGHT - 1)] + shadowMap[i][std::clamp(j - 1, 0, HEIGHT - 1)] + shadowMap[std::clamp(i + 1, 0, WIDTH - 1)][std::clamp(j - 1, 0, HEIGHT - 1)] + shadowMap[std::clamp(i + 1, 0, WIDTH - 1)][j] + shadowMap[i][std::clamp(j + 1, 0, HEIGHT - 1)] + shadowMap[std::clamp(i + 1, 0, WIDTH - 1)][std::clamp(j + 1, 0, HEIGHT - 1)];
+//				shadowMap2[i][j] = shadowMap2[i][j] / 9;
+//
+//				ambient = shadowMap2[i][j];
+//
+//				glm::vec3 colourFromMap = colourMap[i][j];
+//
+//				combine = 1;
+//
+//				int colourR1 = int(std::clamp(round((colourFromMap.r * combine)), 0.0f, 255.0f));
+//				int colourG1 = int(std::clamp(round((colourFromMap.g * combine)), 0.0f, 255.0f));
+//				int colourB1 = int(std::clamp(round((colourFromMap.b * combine)), 0.0f, 255.0f));
+//
+//
+//				colourUint32 = (255 << 24) + (colourR1 << 16) + (colourG1 << 8) + colourB1;
+//				//window.setPixelColour(i, j, colourUint32);
+//			}
+//
+//		}
+//		//std::cout << '\n';
+//	}
+	
 }
 
 
@@ -433,10 +490,10 @@ void draw(DrawingWindow& window, std::vector<ModelTriangle>& triangles, Camera& 
 			else if (triangles.size() == 1) {
 				drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window,zBuffer);
 			}
-			else if (renderType == 2) {
+			else if (renderType == 1) {
 				drawStrokedTriangle(canvasPointTriangle, triangles[i].colour, window, zBuffer);
 			}
-			else if (renderType == 1) {
+			else if (renderType == 2) {
 			//	std::cout << "yo" << '\n';
 				drawFilledTriangle(canvasPointTriangle, triangles[i].colour, window, zBuffer);
 				//window.renderFrame();
@@ -469,7 +526,7 @@ void drawRefLines(DrawingWindow& window, std::vector<std::vector<float>>& zBuffe
 }
 
 
-void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& renderType, int& lightType, int& texture, std::vector<std::vector<float>>& zBuffer, bool& on, std::vector<ModelTriangle>& triangles) {
+void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& renderType, int& lightType, int& texture, std::vector<std::vector<float>>& zBuffer, bool& on, std::vector<ModelTriangle>& triangles, std::vector<std::vector<float>>& shadowMap, std::vector<std::vector<float>>& shadowMap2, std::vector<std::vector<glm::vec3>>& colourMap) {
 	int mode;
 	float theta = 0.5;
 	float scalingFactor = 0.35;
@@ -624,8 +681,8 @@ void handleEvent(SDL_Event event, DrawingWindow& window, Camera& camera, int& re
 			std::cout << "raytrace" << '\n';
 			renderType = 3;
 			resetDepthBuffer(window, zBuffer);
-			drawRayTracing(window, triangles, camera, lightType);
-
+			drawRayTracing(window, triangles, camera, lightType, shadowMap, shadowMap2, colourMap);
+			window.renderFrame();
 		}
 		else if (event.key.keysym.sym == SDLK_t) {
 			std::cout << "textured floor" << '\n';
@@ -699,6 +756,9 @@ int main(int argc, char* argv[]) {
 	Colour WHITE = { 255, 255, 255 };
 
 	std::vector<std::vector<float>> zBuffer(WIDTH, std::vector<float>(HEIGHT));
+	std::vector<std::vector<float>> shadowMap(WIDTH, std::vector<float>(HEIGHT));
+	std::vector<std::vector<float>> shadowMap2(WIDTH, std::vector<float>(HEIGHT));
+	std::vector<std::vector<glm::vec3>> colourMap(WIDTH, std::vector<glm::vec3>(HEIGHT));
 
 	CanvasPoint A = { 160, 10 };
 	CanvasPoint B = { 300, 230 };
@@ -706,6 +766,9 @@ int main(int argc, char* argv[]) {
 
 	float widthTexture = 480;
 	float heightTexture = 395;
+
+	int numberOfLights = 1;
+	std::vector<glm::vec3> lights;
 
 	A.texturePoint = {float(195.0f/480.0f),float(5.0f/395.0f) };
 	B.texturePoint = {float(395.0f/480.0f), float(380.0f/395.0f)};
@@ -717,24 +780,37 @@ int main(int argc, char* argv[]) {
 	//resetDepthBuffer(window, zBuffer); //INITIALISE EVERY ELEMENT ZBUFFER WITH 0
 	//draw(window, triangles, camera, renderType, zBuffer);
 	//drawRayTracing(window, triangles, camera, lightType);
+
+	float radius = 0.25;
+	glm::vec3 lightOrigin = { 0.7,0.7,-0.7 };
 	while (true) {
-		resetDepthBuffer(window, zBuffer);
-		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType, lightType, texture, zBuffer, on, triangles);
+		//std::cout << glm::to_string(camera.getLightSource(lightOrigin, radius)) << '\n';
+	
+		if (window.pollForInputEvents(event)) handleEvent(event, window, camera, renderType, lightType, texture, zBuffer, on, triangles, shadowMap, shadowMap2, colourMap);
 
 		if (renderType == 1) {
+			resetDepthBuffer(window, zBuffer);
 			draw(window, triangles, camera, renderType, texture, zBuffer);
 		}
 		else if (renderType == 2) {
+			resetDepthBuffer(window, zBuffer);
 			draw(window, triangles, camera, renderType, texture, zBuffer);
 		}
 		else if (renderType == 3) {
-		//	drawRayTracing(window, triangles, camera, lightType);
+			//drawRayTracing(window, triangles, camera, lightType, shadowMap, shadowMap2);
 		}
 
 		//drawStrokedTriangle(triangle, WHITE, window, zBuffer);
+		
+		//BEZIER CURVE
+		//camera.update(camera);															//uncomment for curve movement
+
 
 		//drawRefLines(window, zBuffer);
+
+		lights.clear();
 		window.renderFrame();
+		//_sleep(50);
 		//std::cout << "yo " << '\n';
 	}
 }
