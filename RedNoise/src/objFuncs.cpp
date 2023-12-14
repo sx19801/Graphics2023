@@ -70,9 +70,6 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 	std::ifstream MyReadFile("../objFiles/textured-cornell-box.obj");
 	std::ifstream MyReadFileSphere("../objFiles/sphere.obj");
 
-	std::cout << "yo 1" << '\n';
-	//std::cout << MyReadFile.rdbuf() << " pleae " << '\n';
-
 	Colour rgbColour;
 	ModelTriangle modelTriangle;
 	std::vector<ModelTriangle> modelTriangles;
@@ -85,6 +82,7 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 	std::vector<glm::vec3> multiSetVertices;
 	glm::vec3 singleSetVertices;
 
+	
 	std::unordered_map<std::string, glm::vec4> colourMap = loadMatOBJ();
 	
 	while (getline(MyReadFile, myText)) {
@@ -93,6 +91,8 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 		std::stringstream ss3(myText);
 		std::string identifier;
 		ss >> identifier;
+
+		//std::cout << MyReadFile.rdbuf() << '\n';
 
 		/*std::cout << myText[0] << std::endl;
 		for (size_t i = 0; i < myText.size(); i++) std::cout << myText[i] << " " << std::endl;*/
@@ -229,18 +229,18 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 				modelTriangle.vertices[1] = multiSetVertices2[b - 1];
 				modelTriangle.vertices[2] = multiSetVertices2[c - 1];
 
-				rgbValues = colourMap["Red"];
+				rgbValues = colourMap["Green"];
 
-				rgbColour.red = 255;
-				rgbColour.green = 0;
+				rgbColour.red = 0;
+				rgbColour.green = 255;
 				rgbColour.blue = 0;
 
 				modelTriangle.colour = rgbColour;
-				modelTriangle.colour.name = "Red";
+				modelTriangle.colour.name = "Green";
 				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
 				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
 
-				//modelTriangles.push_back(modelTriangle);
+				modelTriangles.push_back(modelTriangle);
 
 			}
 		}

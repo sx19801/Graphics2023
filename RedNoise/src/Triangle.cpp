@@ -167,7 +167,7 @@ void drawLine(CanvasPoint from, CanvasPoint to, Colour colour, DrawingWindow& wi
 				//window.setPixelColour(round(xy.x), round(xy.y), colourUint32);
 					//window.renderFrame();
 				
-			}
+			} else{}
 
 
 			//window.setPixelColour(xy.x, xy.y, colourUint32);
