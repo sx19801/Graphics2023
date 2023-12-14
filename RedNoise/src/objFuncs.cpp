@@ -16,7 +16,7 @@ std::unordered_map<std::string, glm::vec4> loadMatOBJ() {
 	std::unordered_map<std::string, glm::vec4> materialMap;						//initialise hashmap for colour
 
 	std::string myText;
-	std::ifstream MyReadFile("../../../objFiles/textured-cornell-box.mtl");
+	std::ifstream MyReadFile("../objFiles/textured-cornell-box.mtl");
 	Colour colour;
 	std::string name;
 
@@ -67,8 +67,8 @@ Uint32 convColourToUint32(Colour colour) {
 
 std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window) {
 	std::string myText;
-	std::ifstream MyReadFile("../../../objFiles/textured-cornell-box.obj");
-	std::ifstream MyReadFileSphere("../../../objFiles/sphere.obj");
+	std::ifstream MyReadFile("../objFiles/textured-cornell-box.obj");
+	std::ifstream MyReadFileSphere("../objFiles/sphere.obj");
 
 
 	Colour rgbColour;
@@ -230,18 +230,18 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 				modelTriangle.vertices[1] = multiSetVertices2[b - 1];
 				modelTriangle.vertices[2] = multiSetVertices2[c - 1];
 
-				rgbValues = colourMap["Red"];
+				rgbValues = colourMap["Green"];
 
-				rgbColour.red = 255;
-				rgbColour.green = 0;
+				rgbColour.red = 0;
+				rgbColour.green = 255;
 				rgbColour.blue = 0;
 
 				modelTriangle.colour = rgbColour;
-				modelTriangle.colour.name = "Red";
+				modelTriangle.colour.name = "Green";
 				modelTriangle.normal = normalise(calcSurfaceNormal(modelTriangle));
 				//std::cout << glm::to_string(modelTriangle.normal) << '\n';
 
-				//modelTriangles.push_back(modelTriangle);
+				modelTriangles.push_back(modelTriangle);
 
 			}
 		}

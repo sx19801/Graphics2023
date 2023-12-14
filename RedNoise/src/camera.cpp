@@ -77,7 +77,7 @@ void Camera::lookAt(Camera& camera, glm::vec3 lookAtPoint) {
 		-forward,
 	};
 
-	 camera.lookAtToggle = false;
+	// camera.lookAtToggle = false;
 }
 
 glm::vec3 Camera::getPointBezier(Camera& camera) {
@@ -97,12 +97,38 @@ glm::vec3 Camera::getPointBezier(Camera& camera) {
 	return point;
 }
 
+glm::vec3 Camera::getPointBezierLight(Camera& camera) {
+	float tLight = camera.tLight;
+	
+	float uL = 1 - tLight;
+	float ttL = tLight * tLight;
+	float uuL = uL * uL;
+	float uuuL = uuL * uL;
+	float tttL = ttL * tLight;
+
+	glm::vec3 point = (camera.pLight0 * uuuL);		// First term
+	point += (camera.pLight1 * 3.0f * uuL * tLight);		// Second term
+	point += (camera.pLight2 * 3.0f * uL * ttL);		// Third term
+	point += (camera.pLight3 * tttL);					// Fourth term
+
+	return point;
+}
+
+
 void Camera::moveAlongBezier(Camera& camera, glm::vec3& newPosition) {
-	//camera.cameraPosition = newPosition;					//for camera movement
-	camera.lookAtPoint = newPosition;						//for lookatpoint movement
+	camera.cameraPosition = newPosition;					//for camera movement
+	//camera.lookAtPoint = newPosition;						//for lookatpoint movement
 
 
 	camera.lookAt(camera, camera.lookAtPoint);
+}
+
+void Camera::moveAlongBezierLight(Camera& camera, glm::vec3& newPosition) {
+	//camera.cameraPosition = newPosition;					//for camera movement
+	camera.lightSource = newPosition;						//for lookatpoint movement
+	//camera.lightOrigin = newPosition;
+
+	//camera.lookAt(camera, camera.lookAtPoint);
 }
 
 void Camera::update(Camera& camera) {
@@ -110,6 +136,13 @@ void Camera::update(Camera& camera) {
 	if (camera.t > 1.0) camera.t = 1.0;
 	glm::vec3 newPosition = camera.getPointBezier(camera);
 	camera.moveAlongBezier(camera, newPosition);
+}
+
+void Camera::updateLight(Camera& camera) {
+	camera.tLight += camera.speedLight;
+	if (camera.tLight > 1.0) camera.tLight = 1.0;
+	glm::vec3 newPosition = camera.getPointBezierLight(camera);
+	camera.moveAlongBezierLight(camera, newPosition);
 }
 
 

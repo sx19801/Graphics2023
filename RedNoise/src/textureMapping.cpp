@@ -22,7 +22,7 @@ glm::vec3 barycentricCoords(CanvasPoint& xy, CanvasPoint& a, CanvasPoint& b, Can
 }
 
 void loadTextureMap(CanvasTriangle& triangle, DrawingWindow& window, std::vector<std::vector<float>>& zBuffer) {
-	TextureMap textureMap = TextureMap("../../../OBJFiles/texture.ppm");
+	TextureMap textureMap = TextureMap("../objFiles/texture.ppm");
 	
 	//for (size_t i = 0; i < TextureMap("../../../OBJFiles/texture.ppm").pixels.size(); i++) std::cout << TextureMap("../../../OBJFiles/texture.ppm").pixels.size() << '\n';
 

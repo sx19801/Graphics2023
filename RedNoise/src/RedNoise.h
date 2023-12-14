@@ -14,10 +14,10 @@
 #include "lightShade.h"
 #include "textureMapping.h"
 
-//#define WIDTH 640
-//#define HEIGHT 480
-#define WIDTH 320
-#define HEIGHT 240
+#define WIDTH 640
+#define HEIGHT 480
+//#define WIDTH 320
+//#define HEIGHT 240
 //#define WIDTH 1080
 //#define HEIGHT 920
 #define BLACK (255 << 24) + (0 << 16) + (0 << 8) + 0
