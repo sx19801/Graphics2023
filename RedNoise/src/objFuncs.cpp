@@ -70,7 +70,6 @@ std::vector<ModelTriangle> loadGeoOBJ(float scalingFactor, DrawingWindow& window
 	std::ifstream MyReadFile("../objFiles/textured-cornell-box.obj");
 	std::ifstream MyReadFileSphere("../objFiles/sphere.obj");
 
-
 	Colour rgbColour;
 	ModelTriangle modelTriangle;
 	std::vector<ModelTriangle> modelTriangles;
